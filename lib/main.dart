@@ -29,8 +29,7 @@ class MyHomePage extends StatefulWidget {  // Я нихрена не поним�
 
 class _MyHomePageState extends State<MyHomePage> {
   // Здесь может что-то быть.
-  final Proxy proxy = Proxy();
-  SimplePresentator present = SimplePresentator(proxy); // КАКОГО ХРЕНА ЕМУ НАДО?
+  SimplePresentator present = SimplePresentator(Proxy()); // КАКОГО ХРЕНА ЕМУ НАДО?
 
   //Stream _stream = SimplePresentator(proxy).data;
   // Здесь может что-то быть.
@@ -40,18 +39,23 @@ class _MyHomePageState extends State<MyHomePage> {
       body: Column(
         // Здесь может что-то быть.
         children: [
-          StreamBuilder<List<String>>(
-            initialData: [],
-            stream: present.data,           // Здесь должен быть SimplePresentator.data
-            builder: (context, snapShot) {   // Здесь должно быть много кода по превращению потока в виджет...
-              List<String> lst = present.data.toList(); // Что-то не так...
-              ListView lV = ListView.builder(
-                itemBuilder: (BuildContext context, int index) {
-                  return Text(lst[index]);
-                }
-              );
-              return lV;
-            },
+          Expanded(child:
+            StreamBuilder<List<String>>(
+              initialData: ["cgfnm"],           // Значение тестовое, реальное [].
+              stream: present.data,
+              builder: (context, snapShot) {    // Здесь должно быть много кода по превращению потока в виджет...
+                List<String> lst = snapShot.data!;
+                lst.add("value");               // Строка для теста.
+                lst.add("1");                   // Строка для теста.
+                ListView lV = ListView.builder(
+                  itemCount: lst.length,
+                  itemBuilder: (BuildContext context, int index) {
+                    return Text(lst[index]);
+                  }
+                );
+                return lV;
+              },
+            )
           )
         ]
          // Здесь может что-то быть.

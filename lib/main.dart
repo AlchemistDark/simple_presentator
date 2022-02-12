@@ -1,6 +1,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';
+import 'simple_presentator.dart';
 
 void main() => runApp(MyApp());
 
@@ -28,17 +29,30 @@ class MyHomePage extends StatefulWidget {  // Я нихрена не поним�
 
 class _MyHomePageState extends State<MyHomePage> {
   // Здесь может что-то быть.
+  final Proxy proxy = Proxy();
+  SimplePresentator present = SimplePresentator(proxy); // КАКОГО ХРЕНА ЕМУ НАДО?
+
+  //Stream _stream = SimplePresentator(proxy).data;
+  // Здесь может что-то быть.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
       body: Column(
         // Здесь может что-то быть.
         children: [
-          Flexible(child: ListView.builder(
-            itemBuilder: (BuildContext context, int index) {
-              return Text("Pass"); // TODO Здесь будет что-то умнее.
-            }
-          ))
+          StreamBuilder<List<String>>(
+            initialData: [],
+            stream: present.data,           // Здесь должен быть SimplePresentator.data
+            builder: (context, snapShot) {   // Здесь должно быть много кода по превращению потока в виджет...
+              List<String> lst = present.data.toList(); // Что-то не так...
+              ListView lV = ListView.builder(
+                itemBuilder: (BuildContext context, int index) {
+                  return Text(lst[index]);
+                }
+              );
+              return lV;
+            },
+          )
         ]
          // Здесь может что-то быть.
       ),

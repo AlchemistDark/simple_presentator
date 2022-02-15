@@ -56,7 +56,24 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListView lV = ListView.builder(
                   itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
-                    return Text(lst[index]);
+                    return Row(
+                      textDirection: TextDirection.ltr,
+                      children: [
+                        ElevatedButton.icon(
+                          onPressed: (){},  // TODO Здесь должна быть функция редактирования строки.
+                          style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
+                          icon: Icon(Icons.edit),
+                          label: Text("")
+                        ),
+                        ElevatedButton.icon(
+                          onPressed: (){},  // TODO Здесь должна быть функция удаления строки.
+                          style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
+                          icon: Icon(Icons.remove),
+                          label: Text("")
+                        ),
+                        Text(lst[index]),
+                      ],
+                    );
                   }
                 );
                 return lV;

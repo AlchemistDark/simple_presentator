@@ -3,7 +3,7 @@ import 'dart:async';
 /// Класс представления данных.
 class SimplePresentator{
   final Proxy _px; // Здесь хранятся все записи, полученные из _px._list.
-  Stream<List<String>> get data => _ctrl.stream; // Создаём stream.
+  Stream<List<String>> get sData => _ctrl.stream; // Создаём stream.
   StreamController<List<String>> _ctrl = StreamController<List<String>>.broadcast(); // Создаём контроллер этого stream.
   List<String> lastEvent = []; // Я не помню что это и зачем, или не понимаю, но зачем-то тут пустой список...
   // Наверное это инициализация списка последних событий.

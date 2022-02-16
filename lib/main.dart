@@ -60,13 +60,17 @@ class _MyHomePageState extends State<MyHomePage> {
                       textDirection: TextDirection.ltr,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: (){},  // TODO Здесь должна быть функция редактирования строки.
+                          onPressed: (){
+
+                          },  // TODO Здесь должна быть функция редактирования строки.
                           style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
                           icon: Icon(Icons.edit),
                           label: Text("")
                         ),
                         ElevatedButton.icon(
-                          onPressed: (){},  // TODO Здесь должна быть функция удаления строки.
+                          onPressed: ()async {
+                            await present.delete(lst[index]);
+                          },  // TODO Здесь должна быть функция удаления строки.
                           style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
                           icon: Icon(Icons.remove),
                           label: Text("")
@@ -101,3 +105,4 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   // Здесь может что-то быть.
 }
+

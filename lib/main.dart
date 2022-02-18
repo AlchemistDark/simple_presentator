@@ -30,13 +30,15 @@ class MyHomePage extends StatefulWidget {           // Я нихрена не п
 class _MyHomePageState extends State<MyHomePage> {
   // Поля класса
   // Здесь может быть что-то про поля класса.
+  int _ind = -1;     // , который хранит индекс строки списка, которая в данный момент редактируется.
+                      // -1 означает, что в данный момент таких строк нет.
   SimplePresentator present = SimplePresentator(Proxy()); // Данное поле это объект потока данных. Класс описан на строке 4.
   // Здесь может что-то быть.
 
   // Методы класса
   // Здесь может что-то быть.
   void _dataAdd(str) async {
-    await present.create(str);
+    await present.create(str);                     // Метод класса из строки 4 для создания строки списка.
   }
   // Здесь может что-то быть.
 
@@ -56,21 +58,35 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListView lV = ListView.builder(
                   itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
+                    if (_ind == index) {
+                      return
+                        TextField(
+                          onSubmitted: (newStr) async {
+                            await present.edit(lst[index], newStr);  // Метод класса из строки 4 для изменения строки списка.
+                            _ind = -1;           // Отметить, что строка больше не редактируется.
+                          },
+                          decoration: InputDecoration(
+                            border: OutlineInputBorder(),
+                            hintText: lst[index],
+                          )
+                        );
+                    }
                     return Row(
                       textDirection: TextDirection.ltr,
                       children: [
                         ElevatedButton.icon(
-                          onPressed: (){
-
-                          },  // TODO Здесь должна быть функция редактирования строки.
+                          onPressed: () async {
+                            _ind = index;            // Пометить строку как редактируемую.
+                            await present.loadAll(); // Это событие нужно чтобы обновить экран.
+                          },
                           style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
                           icon: Icon(Icons.edit),
                           label: Text("")
                         ),
                         ElevatedButton.icon(
-                          onPressed: ()async {
-                            await present.delete(lst[index]);
-                          },  // TODO Здесь должна быть функция удаления строки.
+                          onPressed: ()async {       //Функция удаления строки.
+                            await present.delete(lst[index]);    // Метод класса из строки 4 для удаления строки списка.
+                          },
                           style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
                           icon: Icon(Icons.remove),
                           label: Text("")

@@ -1,7 +1,7 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';
-import 'simple_presentator.dart';
+import 'package:flutter/material.dart';             // Стандартная библиотека виджетов.
+import 'simple_presentator.dart';                   // Класс для асинхронной работы со списком строк.
 
 void main() => runApp(MyApp());
 
@@ -30,16 +30,17 @@ class MyHomePage extends StatefulWidget {           // Я нихрена не п
 class _MyHomePageState extends State<MyHomePage> {
   // Поля класса
   // Здесь может быть что-то про поля класса.
-  int _ind = -1;     // , который хранит индекс строки списка, которая в данный момент редактируется.
+  int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
                       // -1 означает, что в данный момент таких строк нет.
   SimplePresentator present = SimplePresentator(Proxy()); // Данное поле это объект потока данных. Класс описан на строке 4.
   // Здесь может что-то быть.
 
   // Методы класса
   // Здесь может что-то быть.
-  void _dataAdd(str) async {
-    await present.create(str);                     // Метод класса из строки 4 для создания строки списка.
+  void _dataAdd(String str) async {                       // Метод класса из строки 4 для создания строки списка.
+    await present.create(str);
   }
+
   // Здесь может что-то быть.
 
   // Конструктор.
@@ -53,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
             StreamBuilder<List<String>>(
               initialData: [],
               stream: present.sData,
-              builder: (context, snapShot) {        // Здесь должно быть много кода по превращению потока в виджет...
+              builder: (context, snapShot) {              // Здесь должно быть много кода по превращению потока в виджет...
                 List<String> lst = snapShot.data!;
                 ListView lV = ListView.builder(
                   itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
@@ -63,7 +64,7 @@ class _MyHomePageState extends State<MyHomePage> {
                         TextField(
                           onSubmitted: (newStr) async {
                             await present.edit(lst[index], newStr);  // Метод класса из строки 4 для изменения строки списка.
-                            _ind = -1;           // Отметить, что строка больше не редактируется.
+                            _ind = -1;              // Отметить, что строка больше не редактируется.
                           },
                           decoration: InputDecoration(
                             border: OutlineInputBorder(),
@@ -96,6 +97,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     );
                   }
                 );
+                print(lV);
                 return lV;
               },
             )
@@ -121,4 +123,6 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   // Здесь может что-то быть.
 }
+
+
 

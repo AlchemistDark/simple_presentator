@@ -36,8 +36,18 @@ class _MyHomePageState extends State<MyHomePage> {
                       // -1 означает, что в данный момент таких строк нет.
   SimplePresentator present = SimplePresentator(Proxy()); // Данное поле это объект потока данных. Класс описан на строке 4.
 
-  void _dataAdd(String str) async {                       // Метод класса из строки 4 для создания строки списка.
-    await present.create(str);
+  void _dataAdd(String str) async {                            // Создаёт строку списка.
+    await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
+  }
+  void _dataChecked(int editedIndex, int stringIndex) async {  // Помечает строку как редактируемую.
+    editedIndex = stringIndex;
+    await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
+  }
+  void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
+    await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
+  }
+  void _dataDelete(String str) async {                         // Удалаяет строку.
+    await present.delete(str);                                 // Метод класса из строки 4 для удаления строки списка.
   }
 
   @override
@@ -56,40 +66,15 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
                     if (_ind == index) {
-                      return
-                        TextField(
-                          onSubmitted: (newStr) async {
-                            await present.edit(lst[index], newStr);  // Метод класса из строки 4 для изменения строки списка.
-                            _ind = -1;              // Отметить, что строка больше не редактируется.
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: lst[index],
-                          )
-                        );
+                      return MyTextField(
+                        str: lst[index],
+                        callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
+                      ) ;
                     }
-                    return Row(
-                      textDirection: TextDirection.ltr,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            _ind = index;            // Пометить строку как редактируемую.
-                            await present.loadAll(); // Это событие нужно чтобы обновить экран.
-                          },
-                          style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
-                          icon: Icon(Icons.edit),
-                          label: Text("")
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: ()async {       //Функция удаления строки.
-                            await present.delete(lst[index]);    // Метод класса из строки 4 для удаления строки списка.
-                          },
-                          style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
-                          icon: Icon(Icons.remove),
-                          label: Text("")
-                        ),
-                        Text(lst[index]),
-                      ],
+                    return MyRow(
+                      str: lst[index],
+                      callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
+                      callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
                     );
                   }
                 );
@@ -118,5 +103,49 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 }
 
+class MyTextField extends StatelessWidget {
+  final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
+  final callBackEdit;                             // Сюда передаётся функция редактирования строки.
+
+  const MyTextField({Key? key, required this.str, required this.callBackEdit}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return TextField(
+      onSubmitted: callBackEdit,
+      decoration: InputDecoration(border: OutlineInputBorder(), hintText: str)
+    );
+  }
+}
+
+class MyRow extends StatelessWidget {
+  final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
+  final callBackChecked;                          // Сюда передаётся функция, помечающая строку как редактируемую.
+  final callBackDelete;                           // Сюда передаётся функция удаления строки.
+
+  const MyRow({Key? key,  required this.str, required this.callBackChecked, required this.callBackDelete}) : super(key: key);
+
+  @override
+  Widget build(BuildContext context) {
+    return Row(
+      textDirection: TextDirection.ltr,
+      children: [
+        ElevatedButton.icon(
+            onPressed: callBackChecked,
+            style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
+            icon: Icon(Icons.edit),
+            label: Text("")
+        ),
+        ElevatedButton.icon(
+            onPressed: callBackDelete,
+            style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
+            icon: Icon(Icons.remove),
+            label: Text("")
+        ),
+        Text(str),
+      ],
+    );
+  }
+}
 
 

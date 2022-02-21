@@ -2,6 +2,7 @@
 
 import 'package:flutter/material.dart';             // Стандартная библиотека виджетов.
 import 'simple_presentator.dart';                   // Класс для асинхронной работы со списком строк.
+import 'string_widget.dart';                        // Класс, где хранится виджет строки списка.
 
 void main() {
   final DataSource dataSource = DataSource();
@@ -23,23 +24,33 @@ class MyApp extends StatelessWidget {
 
 class MyHomePage extends StatefulWidget {           // Я нихрена не понимаю что я тут делаю >_<
                                                     // но это какой-то флаттеровский костыль.
-  MyHomePage({Key? key, required this.title}) : super(key: key);
   final String title;
+  MyHomePage({Key? key, required this.title}) : super(key: key);
   @override
 
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
   int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
                       // -1 означает, что в данный момент таких строк нет.
-  SimplePresentator present = SimplePresentator(Proxy()); // Данное поле это объект потока данных. Класс описан на строке 4.
+  SimplePresentator present = SimplePresentator(Proxy());      // Данное поле это объект потока данных. Класс описан на строке 4.
 
-  void _dataAdd(String str) async {                       // Метод класса из строки 4 для создания строки списка.
-    await present.create(str);
+  void _dataAdd(String str) async {                            // Создаёт строку списка.
+    await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
+  }
+  void _dataChecked(int editedIndex, int stringIndex) async {  // Помечает строку как редактируемую.
+    editedIndex = stringIndex;
+    await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
+  }
+  void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
+    await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
+  }
+  void _dataDelete(String str) async {                         // Удалаяет строку.
+    await present.delete(str);                                 // Метод класса из строки 4 для удаления строки списка.
   }
 
+  // Конструктор.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -50,50 +61,23 @@ class _MyHomePageState extends State<MyHomePage> {
             StreamBuilder<List<String>>(
               initialData: [],
               stream: present.sData,
-              builder: (context, snapShot) {              // Здесь должно быть много кода по превращению потока в виджет...
+              builder: (context, snapShot) {                  // Здесь должно быть много кода по превращению потока в виджет...
                 List<String> lst = snapShot.data!;
                 ListView lV = ListView.builder(
-                  itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
+                  itemCount: lst.length,                      // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
-                    if (_ind == index) {
-                      return
-                        TextField(
-                          onSubmitted: (newStr) async {
-                            await present.edit(lst[index], newStr);  // Метод класса из строки 4 для изменения строки списка.
-                            _ind = -1;              // Отметить, что строка больше не редактируется.
-                          },
-                          decoration: InputDecoration(
-                            border: OutlineInputBorder(),
-                            hintText: lst[index],
-                          )
-                        );
-                    }
-                    return Row(
-                      textDirection: TextDirection.ltr,
-                      children: [
-                        ElevatedButton.icon(
-                          onPressed: () async {
-                            _ind = index;            // Пометить строку как редактируемую.
-                            await present.loadAll(); // Это событие нужно чтобы обновить экран.
-                          },
-                          style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
-                          icon: Icon(Icons.edit),
-                          label: Text("")
-                        ),
-                        ElevatedButton.icon(
-                          onPressed: ()async {       //Функция удаления строки.
-                            await present.delete(lst[index]);    // Метод класса из строки 4 для удаления строки списка.
-                          },
-                          style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
-                          icon: Icon(Icons.remove),
-                          label: Text("")
-                        ),
-                        Text(lst[index]),
-                      ],
+                    String _str = lst[index];
+                    print('строка $_str, $index, $_ind');
+                    bool _isEditable = _ind == index;
+                    return StringWidget(                                       // Виджет описан в классе на строке 5.ь
+                      isEditable: _isEditable,
+                      str: lst[index],
+                      callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
+                      callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
+                      callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
                     );
                   }
                 );
-                print(lV);
                 return lV;
               },
             )

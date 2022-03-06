@@ -1,40 +1,43 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';             // Стандартная библиотека виджетов.
-import 'simple_presentator.dart';                   // Класс для асинхронной работы со списком строк.
-import 'string_widget.dart';                        // Класс, где хранится виджет строки списка.
+import 'package:flutter/material.dart';                                     // Стандартная библиотека виджетов.
+import 'simple_presentator.dart';                                           // Класс для асинхронной работы со списком строк.
+import 'string_widget.dart';                                                // Класс, где хранится виджет строки списка.
 
 void main() {
   final DataSource dataSource = DataSource();
-  runApp(MyApp());
+  runApp(MyApp(dataSource));
 }
 
 class MyApp extends StatelessWidget {
+  final DataSource dataSource;
+  MyApp(this.dataSource);
+
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Стрингошлёпалка1',                    // Заголовок окна с программой.
+      title: 'Стрингошлёпалка1',                                            // Заголовок окна с программой.
       theme: ThemeData(
-        primarySwatch: Colors.deepOrange,           // Цвет элементов окна.
+        primarySwatch: Colors.deepOrange,                                   // Цвет элементов окна.
       ),
-      home: MyHomePage(title: 'Стрингошлёпалка2'),  // Скорее всего это имя главного окна.
+      home: MyHomePage(title: 'Стрингошлёпалка2', dataSource: dataSource),  // Скорее всего это имя главного окна.
     );
   }  //Widget build(BuildContext context)
 }  //class
 
-class MyHomePage extends StatefulWidget {           // Я нихрена не понимаю что я тут делаю >_<
-                                                    // но это какой-то флаттеровский костыль.
+class MyHomePage extends StatefulWidget {
   final String title;
-  MyHomePage({Key? key, required this.title}) : super(key: key);
-  @override
+  final DataSource dataSource;
+  MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
+  @override
   _MyHomePageState createState() => _MyHomePageState();
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
                       // -1 означает, что в данный момент таких строк нет.
-  SimplePresentator present = SimplePresentator(Proxy());      // Данное поле это объект потока данных. Класс описан на строке 4.
+  SimplePresentator present = SimplePresentator(Proxy(dataSource));      // Данное поле это объект потока данных. Класс описан на строке 4.
 
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
@@ -73,7 +76,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       isEditable: _isEditable,
                       str: lst[index],
                       callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
-                      callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
+                      callBackEdit: (int text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
                       callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
                     );
                   }

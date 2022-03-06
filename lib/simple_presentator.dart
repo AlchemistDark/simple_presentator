@@ -48,6 +48,7 @@ class SimplePresentator{
 
 /// Хранит функции доступа к DataSource что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
+  // todo конструктор.
   final DataSource _ds = DataSource(); // Здесь хранятся все записи, полученные из _ds._list.
 
   /// Получает все записи.

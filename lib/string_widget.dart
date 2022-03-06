@@ -3,9 +3,9 @@ import 'package:flutter/material.dart';
 class StringWidget extends StatelessWidget {
   final bool isEditable;                          // Сюда передаётся редактируемая это строка или нет.
   final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
-  final callBackChecked;                          // Сюда передаётся функция, помечающая строку как редактируемую.
-  final callBackEdit;                             // Сюда передаётся функция редактирования строки.
-  final callBackDelete;                           // Сюда передаётся функция удаления строки.
+  final void Function() callBackChecked;          // Сюда передаётся функция, помечающая строку как редактируемую.
+  final void Function(String text) callBackEdit;  // Сюда передаётся функция редактирования строки.
+  final void Function() callBackDelete;           // Сюда передаётся функция удаления строки.
 
   const StringWidget(
     {Key? key, required this.isEditable, required this.str, required this.callBackChecked, required this.callBackEdit, required this.callBackDelete}

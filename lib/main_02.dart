@@ -46,12 +46,12 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
   }
-  void _dataChecked(int editedIndex, int stringIndex) async {  // Помечает строку как редактируемую.
-    editedIndex = stringIndex;
-    await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
+  void _dataChecked(int stringIndex) {                         // Помечает строку как редактируемую.
+    setState(() {_ind = stringIndex;});                        // setState обновляет экран.
   }
   void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
     await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
+    _ind = -1;
   }
   void _dataDelete(String str) async {                         // Удалаяет строку.
     await present.delete(str);                                 // Метод класса из строки 4 для удаления строки списка.
@@ -77,11 +77,12 @@ class _MyHomePageState extends State<MyHomePage> {
                     print('строка $_str, $index, $_ind');
                     bool _isEditable = _ind == index;
                     return StringWidget(                                       // Виджет описан в классе на строке 5.ь
-                      isEditable: _isEditable,
+                      isEditable: _isEditable, // todo isEditMode
                       str: lst[index],
-                      callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
+                      callBackChecked: () {_dataChecked(index);},              // Строка ~40.  todo onSelected
                       callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
-                      callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
+                                                                               // todo onEdited
+                      callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.  todo onDeleted
                     );
                   }
                 );

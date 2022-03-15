@@ -30,15 +30,16 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(dataSource);
+  _MyHomePageState createState() => _MyHomePageState(title, dataSource);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   final DataSource dataSource;
+  final String title;
   int _ind = -1;                                     // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
                                                      // -1 означает, что в данный момент таких строк нет.
   late SimplePresentator present;                    // Данное поле это объект потока данных. Класс описан на строке 4.
-  _MyHomePageState(this.dataSource){
+  _MyHomePageState(this.title, this.dataSource){
     present = SimplePresentator(dataSource);
   }
 
@@ -108,7 +109,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ]
       ),
-      appBar: AppBar(title: const Text('Стрингошлёпалка3')) // Заголовок окна.
+      appBar: AppBar(title: Text(title)) // Заголовок окна.
     );
   }
 }

@@ -45,11 +45,11 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
   }
-  void _dataChecked(int editedIndex, int stringIndex) async {  // Помечает строку как редактируемую.
-    editedIndex = stringIndex;
-    print("Start $editedIndex $stringIndex");
+  void _dataChecked(int stringIndex) async {  // Помечает строку как редактируемую.
+    _ind = stringIndex;
+    print("Start $_ind $stringIndex");
     await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
-    print("End $editedIndex $stringIndex");
+    print("End $_ind $stringIndex");
   }
   void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
     await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
@@ -73,15 +73,16 @@ class _MyHomePageState extends State<MyHomePage> {
                 ListView lV = ListView.builder(
                   itemCount: lst.length,            // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
+                    print("index $_ind $index");
                     if (_ind == index) {
                       return MyTextField(
                         str: lst[index],
                         callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
-                      ) ;
+                      );
                     }
                     return MyRow(
                       str: lst[index],
-                      callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
+                      callBackChecked: () {_dataChecked(index);},        // Строка ~40.
                       callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
                     );
                   }
@@ -139,16 +140,16 @@ class MyRow extends StatelessWidget {
       textDirection: TextDirection.ltr,
       children: [
         ElevatedButton.icon(
-            onPressed: callBackChecked,
-            style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
-            icon: Icon(Icons.edit),
-            label: Text("")
+          onPressed: callBackChecked,
+          style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),
+          icon: Icon(Icons.edit),
+          label: Text("")
         ),
         ElevatedButton.icon(
-            onPressed: callBackDelete,
-            style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
-            icon: Icon(Icons.remove),
-            label: Text("")
+          onPressed: callBackDelete,
+          style: ElevatedButton.styleFrom(primary: Colors.red, fixedSize: Size(20, 20)),
+          icon: Icon(Icons.remove),
+          label: Text("")
         ),
         Text(str),
       ],

@@ -30,28 +30,27 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(dataSource: dataSource);
+  _MyHomePageState createState() => _MyHomePageState(dataSource);
 }
-/// Todo Собственно что не так.
-/// В классе _MyHomePageState
-/// Если dataSource инициализировать через конструктор, то он просит ещё и present. Его что тоже по матрёшке от самого Mine объявлять?
-/// Через intState у меня вообще ничего инициализировать не получается, потому что тогда остальной код не видит эти переменные.
+
 class _MyHomePageState extends State<MyHomePage> {
   final DataSource dataSource;
-  int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
-                      // -1 означает, что в данный момент таких строк нет.
-  SimplePresentator present = SimplePresentator(dataSource); // Данное поле это объект потока данных. Класс описан на строке 4.;
- _MyHomePageState(this.dataSource);
+  int _ind = -1;                                     // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
+                                                     // -1 означает, что в данный момент таких строк нет.
+  late SimplePresentator present;                    // Данное поле это объект потока данных. Класс описан на строке 4.
+  _MyHomePageState(this.dataSource){
+    present = SimplePresentator(dataSource);
+  }
 
-   void _dataAdd(String str) async {                       // Метод класса из строки 4 для создания строки списка.
+  void _dataAdd(String str) async {                  // Метод класса из строки 4 для создания строки списка.
     await present.create(str);
   }
 
-  @override
-  void initState() {
-    super.initState();
-  //   SimplePresentator present = SimplePresentator(dataSource); // Данное поле это объект потока данных. Класс описан на строке 4.
-  }
+  // @override
+  // void initState() {
+  //   super.initState();
+  // //   SimplePresentator present = SimplePresentator(dataSource); // Данное поле это объект потока данных. Класс описан на строке 4.
+  // }
 
   @override
   Widget build(BuildContext context) {

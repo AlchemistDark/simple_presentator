@@ -31,13 +31,17 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(dataSource);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-  int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
-                      // -1 означает, что в данный момент таких строк нет.
-  SimplePresentator present = SimplePresentator(Proxy(dataSource));      // Данное поле это объект потока данных. Класс описан на строке 4.
+  final DataSource dataSource;
+  int _ind = -1;                                     // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
+                                                     // -1 означает, что в данный момент таких строк нет.
+  late SimplePresentator present;                    // Данное поле это объект потока данных. Класс описан на строке 4.
+  _MyHomePageState(this.dataSource){
+    present = SimplePresentator(dataSource);
+  }
 
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
@@ -76,7 +80,7 @@ class _MyHomePageState extends State<MyHomePage> {
                       isEditable: _isEditable,
                       str: lst[index],
                       callBackChecked: () {_dataChecked(_ind, index);},        // Строка ~40.
-                      callBackEdit: (int text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
+                      callBackEdit: (text) {_dataEdit(lst[index], text);},     // Строка ~45. Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
                       callBackDelete: () {_dataDelete(lst[index]);},           // Строка ~50.
                     );
                   }

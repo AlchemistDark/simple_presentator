@@ -30,21 +30,26 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState();
+  _MyHomePageState createState() => _MyHomePageState(dataSource);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
-
-  int _ind = -1;      // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
-                      // -1 означает, что в данный момент таких строк нет.
-  SimplePresentator present = SimplePresentator(widget.dataSource); // Данное поле это объект потока данных. Класс описан на строке 4.
+  final DataSource dataSource;
+  int _ind = -1;                                     // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
+  // -1 означает, что в данный момент таких строк нет.
+  late SimplePresentator present;                    // Данное поле это объект потока данных. Класс описан на строке 4.
+  _MyHomePageState(this.dataSource){
+    present = SimplePresentator(dataSource);
+  }
 
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
   }
   void _dataChecked(int editedIndex, int stringIndex) async {  // Помечает строку как редактируемую.
     editedIndex = stringIndex;
+    print("Start $editedIndex $stringIndex");
     await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
+    print("End $editedIndex $stringIndex");
   }
   void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
     await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.

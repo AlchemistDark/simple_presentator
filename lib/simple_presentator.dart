@@ -2,7 +2,7 @@ import 'dart:async';
 
 /// Класс представления данных.
 class SimplePresentator{
-  final Proxy _px = Proxy(); // Здесь хранятся все записи, полученные из _px._list.
+  late Proxy _px; // Здесь хранятся все записи, полученные из _px._list.
   final DataSource _ds;      // Ссылка на DataSource.
   Stream<List<String>> get sData => _ctrl.stream; // Создаём stream.
   StreamController<List<String>> _ctrl = StreamController<List<String>>.broadcast(); // Создаём контроллер этого stream.
@@ -12,6 +12,7 @@ class SimplePresentator{
   /// Конструктор класса.
   SimplePresentator(this._ds){
     loadAll();
+    _px = Proxy(_ds);
   }
   /// Обновляет последнее событие потока.
   void _fireEvent(List<String> updatedList) {
@@ -48,8 +49,9 @@ class SimplePresentator{
 
 /// Хранит функции доступа к DataSource что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
-  // todo конструктор.
-  final DataSource _ds = DataSource(); // Здесь хранятся все записи, полученные из _ds._list.
+  final DataSource _ds;
+
+  Proxy(this._ds); // Здесь хранятся все записи, полученные из _ds._list.
 
   /// Получает все записи.
   Future<List<String>> loadAll() async{

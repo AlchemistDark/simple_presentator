@@ -1,7 +1,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                                        // Стандартная библиотека виджетов.
-import 'simple_presentator.dart';                                              // Класс для асинхронной работы со списком строк.
+import 'simple_presentator2.dart';                                              // Класс для асинхронной работы со списком строк.
 import 'string_widget.dart';                                                   // Класс, где хранится виджет строки списка.
 
 void main() {
@@ -45,18 +45,20 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   void _dataAdd(String str) async {                            // Создаёт строку списка.
-    await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
+    final task = Task(str);
+    await present.create(task);                                 // Метод класса из строки 4 для создания строки списка.
   }
-  void _dataChecked(int stringIndex) async {                   // Помечает строку как редактируемую.
-    _ind = stringIndex;
+  void _dataChecked(int taskIndex) async {                   // Помечает строку как редактируемую.
+    _ind = taskIndex;
     await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
   }
-  void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
-    await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
+  void _dataEdit(Task oldTask, String newStr) async {         // Редактирует строку.
+    final newTask = Task(newStr);
+    await present.edit(oldTask, newTask);                        // Метод класса из строки 4 для редактирования строки списка.
     _ind = -1;
   }
-  void _dataDelete(String str) async {                         // Удалаяет строку.
-    await present.delete(str);                                 // Метод класса из строки 4 для удаления строки списка.
+  void _dataDelete(Task task) async {                         // Удалаяет строку.
+    await present.delete(task);                                 // Метод класса из строки 4 для удаления строки списка.
   }
 
   @override
@@ -66,24 +68,24 @@ class _MyHomePageState extends State<MyHomePage> {
         // Здесь может что-то быть.
         children: [
           Expanded(child:
-            StreamBuilder<List<String>>(
-              initialData: [],
-              stream: present.sData,
+            StreamBuilder<TasksViewModel>(
+              initialData: present.lastState,
+              stream: present.states,
               builder: (context, snapShot) {                  // Здесь должно быть много кода по превращению потока в виджет...
-                List<String> lst = snapShot.data!;
+                final lst = snapShot.data!;
                 ListView lV = ListView.builder(
-                  itemCount: lst.length,                      // Эта строка сообщает ListView.builder сколько всего элементов в списке.
+                  itemCount: lst.items.length,                      // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
-                    String _str = lst[index];
+                    String _str = lst.items[index].name;
                     print('строка $_str, $index, $_ind');
                     bool _isEditMode = _ind == index;
                     return StringWidget(                                       // Виджет описан в классе на строке 5.ь
                       isEditMode: _isEditMode,
-                      str: lst[index],
+                      str: lst.items[index].name,
                       onSelected: () {_dataChecked(index);},                   // Строка ~40. callBack.
-                      onEdited: (text) {_dataEdit(lst[index], text);},         // Строка ~45. callBack.
+                      onEdited: (text) {_dataEdit(lst.items[index], text);},         // Строка ~45. callBack.
                                                                                // Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
-                      onDeleted: () {_dataDelete(lst[index]);},                // Строка ~50. callBack.
+                      onDeleted: () {_dataDelete(lst.items[index]);},                // Строка ~50. callBack.
                     );
                   }
                 );

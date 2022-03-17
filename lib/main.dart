@@ -1,8 +1,8 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';                                     // Стандартная библиотека виджетов.
-import 'simple_presentator.dart';                                           // Класс для асинхронной работы со списком строк.
-import 'string_widget.dart';                                                // Класс, где хранится виджет строки списка.
+import 'package:flutter/material.dart';                                        // Стандартная библиотека виджетов.
+import 'simple_presentator.dart';                                              // Класс для асинхронной работы со списком строк.
+import 'string_widget.dart';                                                   // Класс, где хранится виджет строки списка.
 
 void main() {
   final DataSource dataSource = DataSource();
@@ -16,11 +16,11 @@ class MyApp extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     return MaterialApp(
-      title: 'Стрингошлёпалка1',                                            // Заголовок окна с программой.
+      title: 'Стрингошлёпалка1',                                               // Заголовок окна с программой.
       theme: ThemeData(
-        primarySwatch: Colors.deepOrange,                                   // Цвет элементов окна.
+        primarySwatch: Colors.deepOrange,                                      // Цвет элементов окна.
       ),
-      home: MyHomePage(title: 'Стрингошлёпалка2', dataSource: dataSource),  // Скорее всего это имя главного окна.
+      home: MyHomePage(title: 'Стрингошлёпалка2', dataSource: dataSource),     // Скорее всего это имя главного окна.
     );
   }  //Widget build(BuildContext context)
 }  //class
@@ -31,23 +31,25 @@ class MyHomePage extends StatefulWidget {
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
-  _MyHomePageState createState() => _MyHomePageState(dataSource);
+  _MyHomePageState createState() => _MyHomePageState(title, dataSource);
 }
 
 class _MyHomePageState extends State<MyHomePage> {
   final DataSource dataSource;
+  final String title;
   int _ind = -1;                                     // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
                                                      // -1 означает, что в данный момент таких строк нет.
   late SimplePresentator present;                    // Данное поле это объект потока данных. Класс описан на строке 4.
-  _MyHomePageState(this.dataSource){
+  _MyHomePageState(this.title, this.dataSource){
     present = SimplePresentator(dataSource);
   }
 
   void _dataAdd(String str) async {                            // Создаёт строку списка.
     await present.create(str);                                 // Метод класса из строки 4 для создания строки списка.
   }
-  void _dataChecked(int stringIndex) {                         // Помечает строку как редактируемую.
-    setState(() {_ind = stringIndex;});                        // setState обновляет экран.
+  void _dataChecked(int stringIndex) async {                   // Помечает строку как редактируемую.
+    _ind = stringIndex;
+    await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
   }
   void _dataEdit(String oldStr, String newStr) async {         // Редактирует строку.
     await present.edit(oldStr, newStr);                        // Метод класса из строки 4 для редактирования строки списка.
@@ -57,7 +59,6 @@ class _MyHomePageState extends State<MyHomePage> {
     await present.delete(str);                                 // Метод класса из строки 4 для удаления строки списка.
   }
 
-  // Конструктор.
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -105,7 +106,7 @@ class _MyHomePageState extends State<MyHomePage> {
           )
         ]
       ),
-      appBar: AppBar(title: const Text('Стрингошлёпалка3')) // Заголовок окна.
+      appBar: AppBar(title: Text(title))                    // Заголовок окна.
     );
   }
 }

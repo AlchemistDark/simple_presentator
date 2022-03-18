@@ -2,42 +2,49 @@ import 'dart:async';
 
 /// Класс представления данных.
 class SimplePresentator{
-  late Proxy _px; // Здесь хранятся все записи, полученные из _px._list.
-  final DataSource _ds;      // Ссылка на DataSource.
-  Stream<List<String>> get sData => _ctrl.stream; // Создаём stream.
-  StreamController<List<String>> _ctrl = StreamController<List<String>>.broadcast(); // Создаём контроллер этого stream.
-  List<String> lastEvent = []; // Я не помню что это и зачем, или не понимаю, но зачем-то тут пустой список...
-  // Наверное это инициализация списка последних событий.
+  /// Поля интерфейса класса.
+  late TasksViewModel lastState;                     // Объект, с которым работает stream.
+  Stream<TasksViewModel> get states => _ctrl.stream; // Создаём stream.
+
+  /// Приватные поля класса.
+  StreamController<TasksViewModel> _ctrl = StreamController<TasksViewModel>.broadcast(); // Создаём контроллер этого stream.
+  late Proxy _px;                                    // Здесь хранятся все записи, полученные из _px._list.
+  final DataSource _ds;                              // Ссылка на DataSource.
 
   /// Конструктор класса.
   SimplePresentator(this._ds){
     loadAll();
     _px = Proxy(_ds);
+    lastState = TasksViewModel([]);
   }
   /// Обновляет последнее событие потока.
-  void _fireEvent(List<String> updatedList) {
-    final newEvent = updatedList.toList();
-    lastEvent = newEvent;
-    _ctrl.add(newEvent);
+  void _fireEvent(List<Task> updatedList) {
+    lastState = TasksViewModel(updatedList.toList());
+    _ctrl.add(lastState);
   }
   /// Получает все записи.
   Future<void> loadAll() async {
-    final List<String> updatedList =  await _px.loadAll();
+    final List<Task> updatedList =  await _px.loadAll();
     _fireEvent(updatedList);
   }
   /// Создаёт запись.
-  Future<void> create(String str) async {
-    final List<String> updatedList = await _px.create(str);
+  Future<void> create(Task task) async {
+    final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
   }
   /// Редактирует запись.
-  Future<void> edit(String oldStr, String newStr) async {
-    final List<String> updatedList = await _px.edit(oldStr, newStr);
+  Future<void> edit(Task oldTask, Task newTask) async {
+    final List<Task> updatedList = await _px.edit(oldTask, newTask);
+    _fireEvent(updatedList);
+  }
+  /// Помечает задачу/снимает пометку с задачи.
+  Future<void> checkUncheck(Task task) async {
+    final List<Task> updatedList = await _px.checkUncheck(task);
     _fireEvent(updatedList);
   }
   /// Удаляет запись.
-  Future<void> delete(String str) async {
-    final List<String> updatedList = await _px.delete(str);
+  Future<void> delete(Task task) async {
+    final List<Task> updatedList = await _px.delete(task);
     _fireEvent(updatedList);
   }
 
@@ -47,6 +54,17 @@ class SimplePresentator{
   }
 }
 
+class TasksViewModel {
+  final List<Task> items;
+  TasksViewModel(this.items);
+}
+
+class Task {
+  final bool isDone;
+  final String name;
+  Task(this.name, [this.isDone = false]);
+}
+
 /// Хранит функции доступа к DataSource что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
   final DataSource _ds;
@@ -54,79 +72,103 @@ class Proxy{
   Proxy(this._ds); // Здесь хранятся все записи, полученные из _ds._list.
 
   /// Получает все записи.
-  Future<List<String>> loadAll() async{
+  Future<List<Task>> loadAll() async{
     try {
       final result = await _ds.readAll();
       print("finished loadAll");
       return result;
     } catch (e, st) {
       print("$e, $st");
-      return <String>[];
+      return <Task>[];
     }
   }
   /// Создаёт запись.
-  Future<List<String>> create(String str) async {
+  Future<List<Task>> create(Task task) async {
     try {
-      await _ds.create(str);
+      await _ds.create(task);
       final result = await _ds.readAll();
       print("finished create");
       return result;
     } catch (e, st) {
       print("$e, $st");
-      return  <String>[];
+      return  <Task>[];
     }
   }
   /// Редактирует запись.
-  Future<List<String>> edit(String oldStr, String newStr) async {
+  Future<List<Task>> edit(Task oldTask, Task newTask) async {
     try {
-      await _ds.edit(oldStr, newStr);
+      await _ds.edit(oldTask, newTask);
       final result = await _ds.readAll();
       print("finished edit");
       return result;
     } catch (e, st) {
       print("$e, $st");
-      return <String>["error in edit"];
+      final temp = Task("error in edit");
+      return [temp];
     }
   }
-  /// Удаляет запись.
-  Future<List<String>> delete(String str) async {
+  /// Помечает задачу/снимает пометку с задачи.
+  Future<List<Task>> checkUncheck(Task task) async {
     try {
-      await _ds.delete(str);
+      await _ds.checkUncheck(task);
+      final result = await _ds.readAll();
+      print("finished edit");
+      return result;
+    } catch (e, st) {
+      print("$e, $st");
+      final temp = Task("error in checker");
+      return [temp];
+    }
+  }
+
+  /// Удаляет запись.
+  Future<List<Task>> delete(Task task) async {
+    try {
+      await _ds.delete(task);
       final result = await _ds.readAll();
       print("finished delete");
       return result;
     } catch (e, st) {
       print("$e, $st");
-      return <String>[];
+      return <Task>[];
     }
   }
 }
 
 /// Хранит записи.
 class DataSource{
-  final _list = <String>[]; // Здесь хранятся все записи.
+  final _list = <Task>[]; // Здесь хранятся все записи.
   /// Создаёт запись.
-  Future<void> create(String str) async {
+  Future<void> create(Task task) async {
     await Future.delayed(Duration(milliseconds: 50));
-    _list.add(str);
+    _list.add(task);
     //return _list;
   }
   /// Редактирует запись.
-  Future<List<String>> edit(String oldStr, String newStr) async {
+  Future<List<Task>> edit(Task oldTask, Task newTask) async {
     await Future.delayed(Duration(milliseconds: 50));
-    int _i = _list.indexOf(oldStr);
-    _list[_i] = newStr;
+    int _i = _list.indexOf(oldTask);
+    _list[_i] = newTask;
+    return _list;
+  }
+  /// Помечает задачу/снимает пометку с задачи.
+  Future<List<Task>> checkUncheck(Task task) async {
+    await Future.delayed(Duration(milliseconds: 50));
+    int _i = _list.indexOf(task);
+    final newTask = Task(task.name, !task.isDone);
+    _list[_i] = newTask;
     return _list;
   }
   /// Удаляет запись.
-  Future<List<String>> delete(String str) async {
+  Future<List<Task>> delete(Task task) async {
     await Future.delayed(Duration(milliseconds: 30));
-    _list.remove(str);
+    _list.remove(task);
     return _list;
   }
   /// Выдаёт весь список записей.
-  Future<List<String>> readAll() async {
+  Future<List<Task>> readAll() async {
     await Future.delayed(Duration(milliseconds: 50));
     return _list;
   }
 }
+

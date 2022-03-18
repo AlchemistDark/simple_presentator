@@ -1,15 +1,24 @@
 import 'package:flutter/material.dart';
 
-class StringWidget extends StatelessWidget {
+class TaskWidget extends StatelessWidget {
+  final bool isChecked;                           // Сюда передаётся помечена задача или нет.
   final bool isEditMode;                          // Сюда передаётся редактируемая это строка или нет.
   final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
-  final void Function() onSelected;          // Сюда передаётся функция, помечающая строку как редактируемую.
-  final void Function(String text) onEdited;  // Сюда передаётся функция редактирования строки.
-  final void Function() onDeleted;           // Сюда передаётся функция удаления строки.
+  final void Function(bool?) checkUncheck;        // Сюда передаётся функция, помечающая задачу.
+  final void Function() onSelected;               // Сюда передаётся функция, помечающая строку как редактируемую.
+  final void Function(String text) onEdited;      // Сюда передаётся функция редактирования строки.
+  final void Function() onDeleted;                // Сюда передаётся функция удаления строки.
 
-  const StringWidget(
-    {Key? key, required this.isEditMode, required this.str, required this.onSelected, required this.onEdited, required this.onDeleted}
-  ) : super(key: key);
+  const TaskWidget({
+    Key? key,
+    required this.isChecked,
+    required this.isEditMode,
+    required this.str,
+    required this.checkUncheck,
+    required this.onSelected,
+    required this.onEdited,
+    required this.onDeleted
+  }) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
@@ -23,6 +32,10 @@ class StringWidget extends StatelessWidget {
     return Row(
       textDirection: TextDirection.ltr,
       children: [
+        Checkbox(
+          value: isChecked,
+          onChanged: checkUncheck,
+        ),
         ElevatedButton.icon(
           onPressed: onSelected,
           style: ElevatedButton.styleFrom(primary: Colors.green, fixedSize: Size(5, 5)),

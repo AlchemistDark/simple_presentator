@@ -1,8 +1,8 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                                        // Стандартная библиотека виджетов.
-import 'simple_presentator2.dart';                                              // Класс для асинхронной работы со списком строк.
-import 'string_widget.dart';                                                   // Класс, где хранится виджет строки списка.
+import 'simple_presentator.dart';                                              // Класс для асинхронной работы со списком строк.
+import 'task_widget.dart';                                                   // Класс, где хранится виджет строки списка.
 
 void main() {
   final DataSource dataSource = DataSource();
@@ -53,9 +53,12 @@ class _MyHomePageState extends State<MyHomePage> {
     await present.loadAll();                                   // Это событие нужно чтобы обновить экран. Это метод класса на строке 4.
   }
   void _dataEdit(Task oldTask, String newStr) async {         // Редактирует строку.
-    final newTask = Task(newStr);
+    final newTask = Task(newStr, oldTask.isDone);
     await present.edit(oldTask, newTask);                        // Метод класса из строки 4 для редактирования строки списка.
     _ind = -1;
+  }
+  void _chekUnchek(Task task) async {         // Редактирует чек.
+    await present.checkUncheck(task);                        // Метод класса из строки 4 для редактирования строки списка.
   }
   void _dataDelete(Task task) async {                         // Удалаяет строку.
     await present.delete(task);                                 // Метод класса из строки 4 для удаления строки списка.
@@ -79,13 +82,15 @@ class _MyHomePageState extends State<MyHomePage> {
                     String _str = lst.items[index].name;
                     print('строка $_str, $index, $_ind');
                     bool _isEditMode = _ind == index;
-                    return StringWidget(                                       // Виджет описан в классе на строке 5.ь
+                    return TaskWidget(                                       // Виджет описан в классе на строке 5.ь
+                      isChecked: lst.items[index].isDone,
                       isEditMode: _isEditMode,
                       str: lst.items[index].name,
+                      checkUncheck: (bool) {_chekUnchek(lst.items[index]);},
                       onSelected: () {_dataChecked(index);},                   // Строка ~40. callBack.
                       onEdited: (text) {_dataEdit(lst.items[index], text);},         // Строка ~45. callBack.
                                                                                // Праметр text должен как-то импортироваться из виджета, который сам в другом классе.
-                      onDeleted: () {_dataDelete(lst.items[index]);},                // Строка ~50. callBack.
+                      onDeleted: () {_dataDelete(lst.items[index]);},                 // Строка ~50. callBack.
                     );
                   }
                 );

@@ -22,56 +22,57 @@ class SimplePresentator{
     lastState = TasksViewModel(updatedList.toList());
     _ctrl.add(lastState);
   }
-  /// Получает все записи.
+  /// Получает актуальный список задач.
   Future<void> loadAll() async {
     final List<Task> updatedList =  await _px.loadAll();
     _fireEvent(updatedList);
   }
-  /// Создаёт запись.
+  /// Создаёт задачу.
   Future<void> create(Task task) async {
     final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
   }
-  /// Редактирует запись.
+  /// Редактирует задачу.
   Future<void> edit(Task oldTask, Task newTask) async {
     final List<Task> updatedList = await _px.edit(oldTask, newTask);
     _fireEvent(updatedList);
   }
   /// Помечает задачу/снимает пометку с задачи.
-  Future<void> checkUncheck(Task task) async {
+  Future<void> checkChange(Task task) async {
     final List<Task> updatedList = await _px.checkUncheck(task);
     _fireEvent(updatedList);
   }
-  /// Удаляет запись.
+  /// Удаляет задачу.
   Future<void> delete(Task task) async {
     final List<Task> updatedList = await _px.delete(task);
     _fireEvent(updatedList);
   }
-
-  /// Закрыть stream.
+  /// Закрывает stream.
   void discard(){
     _ctrl.close();
   }
 }
 
+/// Класс, преобразующий задачу для вывода (например, в консоль или в специальный виджет).
 class TasksViewModel {
   final List<Task> items;
   TasksViewModel(this.items);
 }
 
+/// Класс задачи.
 class Task {
   final bool isDone;
   final String name;
   Task(this.name, [this.isDone = false]);
 }
 
-/// Хранит функции доступа к DataSource что бы не захламлять основной (SimplePresentator) класс.
+/// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
-  final DataSource _ds;
+  final DataSource _ds;      // Здесь хранятся все задачи, полученные из _ds._list.
 
-  Proxy(this._ds); // Здесь хранятся все записи, полученные из _ds._list.
+  Proxy(this._ds);           // Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
 
-  /// Получает все записи.
+  /// Получает актуальный список задач.
   Future<List<Task>> loadAll() async{
     try {
       final result = await _ds.readAll();
@@ -82,7 +83,7 @@ class Proxy{
       return <Task>[];
     }
   }
-  /// Создаёт запись.
+  /// Создаёт задачу.
   Future<List<Task>> create(Task task) async {
     try {
       await _ds.create(task);
@@ -94,7 +95,7 @@ class Proxy{
       return  <Task>[];
     }
   }
-  /// Редактирует запись.
+  /// Редактирует задачу.
   Future<List<Task>> edit(Task oldTask, Task newTask) async {
     try {
       await _ds.edit(oldTask, newTask);
@@ -120,8 +121,7 @@ class Proxy{
       return [temp];
     }
   }
-
-  /// Удаляет запись.
+  /// Удаляет задачу.
   Future<List<Task>> delete(Task task) async {
     try {
       await _ds.delete(task);
@@ -135,16 +135,16 @@ class Proxy{
   }
 }
 
-/// Хранит записи.
+/// Класс источника данных. Его экземпляр хранит список весх существующих задач.
 class DataSource{
   final _list = <Task>[]; // Здесь хранятся все записи.
-  /// Создаёт запись.
+  /// Создаёт задачу.
   Future<void> create(Task task) async {
     await Future.delayed(Duration(milliseconds: 50));
     _list.add(task);
     //return _list;
   }
-  /// Редактирует запись.
+  /// Редактирует задачу.
   Future<List<Task>> edit(Task oldTask, Task newTask) async {
     await Future.delayed(Duration(milliseconds: 50));
     int _i = _list.indexOf(oldTask);
@@ -159,13 +159,13 @@ class DataSource{
     _list[_i] = newTask;
     return _list;
   }
-  /// Удаляет запись.
+  /// Удаляет задачу.
   Future<List<Task>> delete(Task task) async {
     await Future.delayed(Duration(milliseconds: 30));
     _list.remove(task);
     return _list;
   }
-  /// Выдаёт весь список записей.
+  /// Выдаёт актуальный список задач.
   Future<List<Task>> readAll() async {
     await Future.delayed(Duration(milliseconds: 50));
     return _list;

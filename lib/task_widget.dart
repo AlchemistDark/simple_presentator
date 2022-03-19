@@ -1,20 +1,22 @@
 import 'package:flutter/material.dart';
 
+/// Класс виджета задачи.
 class TaskWidget extends StatelessWidget {
   final bool isChecked;                           // Сюда передаётся помечена задача или нет.
   final bool isEditMode;                          // Сюда передаётся редактируемая это строка или нет.
   final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
-  final void Function(bool?) checkUncheck;        // Сюда передаётся функция, помечающая задачу.
+  final void Function(bool?) onCheckChanged;      // Сюда передаётся функция, помечающая задачу.
   final void Function() onSelected;               // Сюда передаётся функция, помечающая строку как редактируемую.
   final void Function(String text) onEdited;      // Сюда передаётся функция редактирования строки.
   final void Function() onDeleted;                // Сюда передаётся функция удаления строки.
 
+  /// Конструктор класса.
   const TaskWidget({
     Key? key,
     required this.isChecked,
     required this.isEditMode,
     required this.str,
-    required this.checkUncheck,
+    required this.onCheckChanged,
     required this.onSelected,
     required this.onEdited,
     required this.onDeleted
@@ -34,7 +36,7 @@ class TaskWidget extends StatelessWidget {
       children: [
         Checkbox(
           value: isChecked,
-          onChanged: checkUncheck,
+          onChanged: onCheckChanged,
         ),
         ElevatedButton.icon(
           onPressed: onSelected,

@@ -5,6 +5,7 @@ class TaskWidget extends StatelessWidget {
   final bool isChecked;                           // Сюда передаётся помечена задача или нет.
   final bool isEditMode;                          // Сюда передаётся редактируемая это строка или нет.
   final String str;                               // Сюда передаётся та строка списка, ради которой и замутили виджет.
+  final void Function() onTaped;                  // Сюда передаётся функция, выделяющая задачу.
   final void Function(bool?) onCheckChanged;      // Сюда передаётся функция, помечающая задачу.
   final void Function() onSelected;               // Сюда передаётся функция, помечающая строку как редактируемую.
   final void Function(String text) onEdited;      // Сюда передаётся функция редактирования строки.
@@ -16,6 +17,7 @@ class TaskWidget extends StatelessWidget {
     required this.isChecked,
     required this.isEditMode,
     required this.str,
+    required this.onTaped,
     required this.onCheckChanged,
     required this.onSelected,
     required this.onEdited,
@@ -50,7 +52,12 @@ class TaskWidget extends StatelessWidget {
           icon: Icon(Icons.remove),
           label: Text("")
         ),
-        Text(str),
+        Expanded(child:
+          GestureDetector(
+            onTap: onTaped,
+            child: Text(str)
+          )
+        ),
       ],
     );
   }

@@ -1,6 +1,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                    // Стандартная библиотека виджетов.
+import 'package:simple_presentator/task_edit_dialog.dart';
 import 'simple_presentator.dart';                          // Класс для асинхронной работы со списком задач.
 import 'task_widget.dart';                                 // Класс, где хранится виджет задачи.
 
@@ -39,9 +40,6 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   final String title;                                      // Заголовок главного окна.
   late SimplePresentator present;                          // Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
 
-  int _indEditable = -1;                                   // Поле, которое хранит индекс строки списка, которая в данный момент редактируется.
-                                                           // Задача с этим индексом выводится как Editable.
-                                                           // -1 означает, что в данный момент таких задач нет.
   int _indSelected = -1;                                   // Поле, которое хранит индекс строки списка, которая в данный момент тапнута.
                                                            // Задача с этим индексом передаётся в AppBar.
                                                            // -1 означает, что в данный момент таких задач нет.
@@ -69,17 +67,23 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   void _dataEdit(Task oldTask, String newStr) async {
     final newTask = Task(newStr, oldTask.isDone);
     await present.edit(oldTask, newTask);                  // Метод класса из строки 4 для редактирования поля [Task.name] задчи.
-    _indEditable = -1;                                     // Помеяает, что больше пока задачи не редактируются.
+    _indSelected = -1;                                     // Помеяает, что больше пока задачи не редактируются.
   }
   /// Удаляет задачу.
   void _dataDelete(Task task) async {
     await present.delete(task);                            // Метод класса из строки 4 для удаления строки списка.
   }
   /// Помечает задачу как Editable.
-  void _onAppBarEditPressed(){
-    setState(() {                                          // В конце setState обновляет виджет.
-      _indEditable = _indSelected;
-    },);
+  void _onAppBarEditPressed(Task task) async {
+    final page = MaterialPageRoute<Task>(
+      builder: (BuildContext context) {
+        return TaskEditDialog(task: task);
+      }
+    );
+    final result = await Navigator.of(context).push<Task>(page);
+    if (result != null) {
+      present.edit(task, result);
+    }
   }
 
   @override
@@ -97,8 +101,8 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
                   itemCount: lst.items.length,                                 // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
                     String _str = lst.items[index].name;
-                    print('строка $_str, $index, $_indEditable');
-                    bool _isEditMode = _indEditable == index;
+                    print('строка $_str, $index, $_indSelected');
+                    bool _isEditMode = _indSelected == index;
                     return TaskWidget(                                         // Виджет описан в классе на строке 5.
                       isSelected: lst.items[index].isDone,
                       isEditMode: _isEditMode,
@@ -132,7 +136,7 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
         title: Text(title),                                // Заголовок окна.
         actions: [
           ElevatedButton.icon(
-            onPressed: _onAppBarEditPressed,
+            onPressed: (){_onAppBarEditPressed(_selectedTask);},
             style: ElevatedButton.styleFrom(
               primary: Colors.green[400],
               fixedSize: Size(3, 3)

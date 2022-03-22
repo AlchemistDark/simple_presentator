@@ -72,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   /// Удаляет задачу.
   void _dataDelete(Task task) async {
     await present.delete(task);                            // Метод класса из строки 4 для удаления строки списка.
+    _indSelected = -1;                                     // Помеяает, что больше пока задачи не редактируются.
   }
   /// Помечает задачу как Editable.
   void _onAppBarEditPressed(Task task) async {
@@ -107,7 +108,7 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
                       isSelected: lst.items[index].isDone,
                       isEditMode: _isEditMode,
                       str: lst.items[index].name,
-                      onSelected: (){_onTaped(lst.items[index], index);},                // Строка ~60. callBack.
+                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~60. callBack.
                       onCheckChanged: (bool) {_checkChanged(lst.items[index]);},         // Строка ~65. callBack.
                       onEditFinished: (text) {_dataEdit(lst.items[index], text);},       // Строка ~70. callBack.
                     );

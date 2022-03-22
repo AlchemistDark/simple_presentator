@@ -22,12 +22,11 @@ class TaskWidget extends StatelessWidget {
 
   @override
   Widget build(BuildContext context) {
+    Color? color = Color(0);
     if (isEditMode) {
-      return
-        TextField(
-          onSubmitted: onEditFinished,
-          decoration: InputDecoration(border: OutlineInputBorder(), hintText: str)
-        );
+      color = Colors.green;
+    } else {
+      color = Colors.white;
     }
     return Row(
       textDirection: TextDirection.ltr,
@@ -39,7 +38,9 @@ class TaskWidget extends StatelessWidget {
         Expanded(child:
           GestureDetector(
             onTap: onSelected,
-            child: Text(str)
+            child: Text(str,
+              style: TextStyle(backgroundColor: color),
+            )
           )
         ),
       ],

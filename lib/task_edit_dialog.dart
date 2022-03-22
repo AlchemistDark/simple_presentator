@@ -24,7 +24,11 @@ class TaskEditDialog extends StatelessWidget{
           Text(task.name),
           TextField(
             onSubmitted: (newText)=>_onTextSubmitted(newText),
-            decoration: InputDecoration(),
+            textAlign: TextAlign.center,
+            decoration: InputDecoration(
+              border: OutlineInputBorder(),
+              hintText: "Enter a new task name",
+            ),
           ),
         ],
       ),

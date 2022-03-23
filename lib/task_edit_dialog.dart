@@ -4,12 +4,13 @@ import 'package:simple_presentator/simple_presentator.dart';
 class TaskEditDialog extends StatelessWidget{
   final Task task;
 
-  Task _editedTask = Task("");
+  Task _editedTask = Task("If you see it, then something is wrong.");
 
   TaskEditDialog({Key? key, required this.task}) : super(key: key);
 
   @override
   Widget build(BuildContext context) {
+    _editedTask = task;
     return Scaffold(
       appBar: AppBar(
         actions: [
@@ -22,8 +23,9 @@ class TaskEditDialog extends StatelessWidget{
       body: Column(
         children: [
           Text(task.name),
-          TextField(
-            onSubmitted: (newText)=>_onTextSubmitted(newText),
+          TextFormField(initialValue: task.name,
+            onChanged: (newText)=>_onTextSubmitted(newText),
+            onFieldSubmitted: (newText)=>_onTextSubmitted(newText),
             textAlign: TextAlign.center,
             decoration: InputDecoration(
               border: OutlineInputBorder(),

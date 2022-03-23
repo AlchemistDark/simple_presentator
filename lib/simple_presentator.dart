@@ -13,9 +13,9 @@ class SimplePresentator{
 
   /// Конструктор класса.
   SimplePresentator(this._ds){
-    loadAll();
     _px = Proxy(_ds);
     lastState = TasksViewModel([]);
+    loadAll();
   }
   /// Обновляет последнее событие потока.
   void _fireEvent(List<Task> updatedList) {

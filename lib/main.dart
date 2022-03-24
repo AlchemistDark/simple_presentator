@@ -133,33 +133,40 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
           )
         ]
       ),
-      appBar: AppBar(
-        title: Text(title),                                // Заголовок окна.
-        actions: [
-          ElevatedButton.icon(
-            onPressed: (){_onAppBarEditPressed(_selectedTask);},
-            style: ElevatedButton.styleFrom(
-              primary: Colors.green[400],
-              fixedSize: Size(3, 3)
-            ),
-            icon: Icon(Icons.edit),
-            label: Text("")
+      appBar: _buildAppBar()
+    );
+  }
+
+  AppBar _buildAppBar() {
+    final showDeleteButton = _indSelected != -1;
+    final showEditButton = _indSelected != -1;
+
+    return AppBar(
+      title: Text(title),                                // Заголовок окна.
+      actions: [
+        if (showEditButton) ElevatedButton.icon(
+          onPressed: (){_onAppBarEditPressed(_selectedTask);},
+          style: ElevatedButton.styleFrom(
+            primary: Colors.green[400],
+            fixedSize: Size(3, 3)
           ),
-          ElevatedButton.icon(
-            onPressed: (){
-              setState(() {                               // В конце setState обновляет виджет.
-                _dataDelete(_selectedTask);               // Строка ~75.
-              });
-            },
-            style: ElevatedButton.styleFrom(
-              primary: Colors.red[900],
-              fixedSize: Size(20, 20)
-            ),
-            icon: Icon(Icons.remove),
-            label: Text("")
+          icon: Icon(Icons.edit),
+          label: Text("")
+        ),
+        if (showDeleteButton) ElevatedButton.icon(
+          onPressed: (){
+            setState(() {                               // В конце setState обновляет виджет.
+              _dataDelete(_selectedTask);               // Строка ~75.
+            });
+          },
+          style: ElevatedButton.styleFrom(
+            primary: Colors.red[900],
+            fixedSize: Size(20, 20)
           ),
-        ],
-      )
+          icon: Icon(Icons.remove),
+          label: Text("")
+        ),
+      ],
     );
   }
 }

@@ -40,8 +40,10 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   final String title;                                      // Заголовок главного окна.
   late SimplePresentator present;                          // Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
 
-  int _indSelected = -1;                                   // Поле, которое хранит индекс строки списка, которая в данный момент тапнута.
+  //int _indSelected = -1;                                   // Поле, которое хранит индекс строки списка, которая в данный момент тапнута.
                                                            // Задача с этим индексом передаётся в AppBar.
+  /// Здесь хранится список индексов выделенных задач.
+  final List<int> selectedTaskIndex = [];
                                                            // -1 означает, что в данный момент таких задач нет.
   Task _selectedTask = Task("name");                       // Здесь хранится ссылка на выбранную  задачу (ссылка передаётся в AppBar, когда её индекс совпадает _indTaped).
 
@@ -57,22 +59,27 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   /// Выделяет задачу.
   void _onTaped(Task task, int index){
     _selectedTask = task;
-    _indSelected = index;
+   // _indSelected = index;
+    if (selectedTaskIndex.contains(index)) {
+      selectedTaskIndex.remove(index);
+    } else {
+      selectedTaskIndex.add(index);
+    }
   }
   /// Меняет значение [Task.isDone] задачи.
   void _checkChanged(Task task) async {
     await present.checkChange(task);                       // Метод класса из строки 4 для редактирования строки списка.
   }
   /// Редактирует поле [Task.name] задачи.
-  void _dataEdit(Task oldTask, String newStr) async {
-    final newTask = Task(newStr, oldTask.isDone);
-    await present.edit(oldTask, newTask);                  // Метод класса из строки 4 для редактирования поля [Task.name] задчи.
-    _indSelected = -1;                                     // Помеяает, что больше пока задачи не редактируются.
-  }
+  // void _dataEdit(Task oldTask, String newStr) async {
+  //   final newTask = Task(newStr, oldTask.isDone);
+  //   await present.edit(oldTask, newTask);                  // Метод класса из строки 4 для редактирования поля [Task.name] задчи.
+  //   selectedTaskIndex.clear();                                     // Помеяает, что больше пока задачи не редактируются.
+  //}
   /// Удаляет задачу.
   void _dataDelete(Task task) async {
     await present.delete(task);                            // Метод класса из строки 4 для удаления строки списка.
-    _indSelected = -1;                                     // Помеяает, что больше пока задачи не редактируются.
+    selectedTaskIndex.clear();                                     // Помеяает, что больше пока задачи не редактируются.
   }
   /// Помечает задачу как Editable.
   void _onAppBarEditPressed(Task task) async {
@@ -83,6 +90,7 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
     );
     final result = await Navigator.of(context).push<Task>(page);
     if (result != null) {
+      print("got from dialog: ${result.status}");
       present.edit(task, result);
     }
   }
@@ -102,15 +110,12 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
                   itemCount: lst.items.length,                                 // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
                     String _str = lst.items[index].name;
-                    print('строка $_str, $index, $_indSelected');
-                    bool _isEditMode = _indSelected == index;
+                    print('строка $_str, $index, $selectedTaskIndex _indSelected');
                     return TaskWidget(                                         // Виджет описан в классе на строке 5.
-                      isSelected: lst.items[index].isDone,
-                      isEditMode: _isEditMode,
-                      str: lst.items[index].name,
+                      task: lst.items[index],
+                      isSelected: selectedTaskIndex.contains(index),
                       onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~60. callBack.
-                      onCheckChanged: (bool) {_checkChanged(lst.items[index]);},         // Строка ~65. callBack.
-                      onEditFinished: (text) {_dataEdit(lst.items[index], text);},       // Строка ~70. callBack.
+                      onIsDoneChanged: (bool) {_checkChanged(lst.items[index]);},         // Строка ~65. callBack.
                     );
                   }
                 );
@@ -138,8 +143,8 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   }
 
   AppBar _buildAppBar() {
-    final showDeleteButton = _indSelected != -1;
-    final showEditButton = _indSelected != -1;
+    final showDeleteButton = selectedTaskIndex.isNotEmpty;//    _indSelected != -1;
+    final showEditButton = selectedTaskIndex.length == 1;//_indSelected != -1;
 
     return AppBar(
       title: Text(title),                                // Заголовок окна.

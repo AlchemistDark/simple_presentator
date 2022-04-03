@@ -59,12 +59,29 @@ class TasksViewModel {
   TasksViewModel(this.items);
 }
 
+String statusToString(TaskStatusEnum status) {
+  switch (status){
+    case TaskStatusEnum.notStarted: return "Not started";
+    case TaskStatusEnum.started: return "Started";
+    case TaskStatusEnum.inProgress: return "In Progress";
+    case TaskStatusEnum.finished: return "Finished";
+    case TaskStatusEnum.somethingIsWrong: return "Something is wrong";
+  }
+}
+
 /// Класс задачи.
 class Task {
   final bool isDone;
+  final TaskStatusEnum status;
   final String name;
-  Task(this.name, [this.isDone = false]);
+  Task(this.name, [this.isDone = false, this.status = TaskStatusEnum.notStarted]);
+
+  String get statusStr {
+    return statusToString(status);
+  }
 }
+
+enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong}
 
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{

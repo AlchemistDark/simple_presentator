@@ -1,7 +1,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                    // Стандартная библиотека виджетов.
-import 'package:simple_presentator/task_edit_dialog.dart';
+import 'package:simple_presentator/task_edit_dialog.dart'; // Класс окна редактирования задач.
 import 'simple_presentator.dart';                          // Класс для асинхронной работы со списком задач.
 import 'task_widget.dart';                                 // Класс, где хранится виджет задачи.
 
@@ -10,7 +10,8 @@ void main() {
   runApp(MyApp(dataSource));
 }
 
-class MyApp extends StatelessWidget {                      // Приложение.
+/// Приложение.
+class MyApp extends StatelessWidget {
   final DataSource dataSource;
   MyApp(this.dataSource);
 
@@ -26,7 +27,8 @@ class MyApp extends StatelessWidget {                      // Приложени
   }  //Widget build(BuildContext context)
 }  //class
 
-class MyHomePage extends StatefulWidget {                  // Главное окно приложения.
+/// Главное окно приложения.
+class MyHomePage extends StatefulWidget {
   final String title;
   final DataSource dataSource;
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
@@ -35,17 +37,19 @@ class MyHomePage extends StatefulWidget {                  // Главное о�
   _MyHomePageState createState() => _MyHomePageState(title, dataSource);
 }
 
-class _MyHomePageState extends State<MyHomePage> {         // Здесь описаны парметры (:гражданства:) главного окна.
-  final DataSource dataSource;                             // Ссылка на источник данных.
-  final String title;                                      // Заголовок главного окна.
-  late SimplePresentator present;                          // Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
-
-  //int _indSelected = -1;                                   // Поле, которое хранит индекс строки списка, которая в данный момент тапнута.
-                                                           // Задача с этим индексом передаётся в AppBar.
+/// State главного окна приложения.
+class _MyHomePageState extends State<MyHomePage> {
+  /// Ссылка на источник данных.
+  final DataSource dataSource;
+  /// Заголовок главного окна.
+  final String title;
+  /// Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
+  late SimplePresentator present;
   /// Здесь хранится список индексов выделенных задач.
-  final List<int> selectedTaskIndex = [];
-                                                           // -1 означает, что в данный момент таких задач нет.
-  Task _selectedTask = Task("name");                       // Здесь хранится ссылка на выбранную  задачу (ссылка передаётся в AppBar, когда её индекс совпадает _indTaped).
+  /// -1 означает, что в данный момент таких задач нет.
+  List<int> _selectedTasksIndexes = [];
+  /// Здесь хранится ссылка на выбранную  задачу (ссылка передаётся в AppBar, когда её индекс совпадает _indTaped).
+  Task _selectedTask = Task("name");
 
   /// Конструктор класса.
   _MyHomePageState(this.title, this.dataSource){
@@ -59,29 +63,22 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   /// Выделяет задачу.
   void _onTaped(Task task, int index){
     _selectedTask = task;
-   // _indSelected = index;
-    if (selectedTaskIndex.contains(index)) {
-      selectedTaskIndex.remove(index);
+    if (_selectedTasksIndexes.contains(index)) {
+      _selectedTasksIndexes.remove(index);
     } else {
-      selectedTaskIndex.add(index);
+      _selectedTasksIndexes.add(index);
     }
   }
-  /// Меняет значение [Task.isDone] задачи.
-  void _checkChanged(Task task) async {
-    await present.checkChange(task);                       // Метод класса из строки 4 для редактирования строки списка.
-  }
-  /// Редактирует поле [Task.name] задачи.
-  // void _dataEdit(Task oldTask, String newStr) async {
-  //   final newTask = Task(newStr, oldTask.isDone);
-  //   await present.edit(oldTask, newTask);                  // Метод класса из строки 4 для редактирования поля [Task.name] задчи.
-  //   selectedTaskIndex.clear();                                     // Помеяает, что больше пока задачи не редактируются.
-  //}
   /// Удаляет задачу.
-  void _dataDelete(Task task) async {
-    await present.delete(task);                            // Метод класса из строки 4 для удаления строки списка.
-    selectedTaskIndex.clear();                                     // Помеяает, что больше пока задачи не редактируются.
+  void _dataDelete() async {
+    List<int> _indexes = [];
+    for (int i = 0; i < _selectedTasksIndexes.length; i++) {
+      _indexes.add(_selectedTasksIndexes[i]);
+    }
+    await present.delete(_indexes);
+    _selectedTasksIndexes.clear();
   }
-  /// Помечает задачу как Editable.
+  /// Помечает задачу как Editable и открывает в окно TaskEditDialog.
   void _onAppBarEditPressed(Task task) async {
     final page = MaterialPageRoute<Task>(
       builder: (BuildContext context) {
@@ -100,22 +97,19 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
     return Scaffold(
       body: Column(
         children: [
-          Expanded(child:
+          Flexible (child:
             StreamBuilder<TasksViewModel>(
               initialData: present.lastState,
               stream: present.states,
               builder: (context, snapShot) {
                 final lst = snapShot.data!;
                 ListView lV = ListView.builder(
-                  itemCount: lst.items.length,                                 // Эта строка сообщает ListView.builder сколько всего элементов в списке.
+                  itemCount: lst.items.length,                                           // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
-                    String _str = lst.items[index].name;
-                    print('строка $_str, $index, $selectedTaskIndex _indSelected');
-                    return TaskWidget(                                         // Виджет описан в классе на строке 5.
+                    return TaskWidget(                                                   // Виджет описан в классе на строке 5.
                       task: lst.items[index],
-                      isSelected: selectedTaskIndex.contains(index),
-                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~60. callBack.
-                      onIsDoneChanged: (bool) {_checkChanged(lst.items[index]);},         // Строка ~65. callBack.
+                      isSelected: _selectedTasksIndexes.contains(index),
+                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
                     );
                   }
                 );
@@ -127,7 +121,7 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){
               setState(() {
-                _dataAdd(text);                            // Добавляет таск в tasks (строка ~55)
+                _dataAdd(text);                            // Добавляет таск в tasks (строка ~60)
                 TextEditingController().text = " ";        // Эта хрень чистит поле после каждого ввода.
               });                                          // В конце setState обновляет виджет.
             },
@@ -143,34 +137,48 @@ class _MyHomePageState extends State<MyHomePage> {         // Здесь опи�
   }
 
   AppBar _buildAppBar() {
-    final showDeleteButton = selectedTaskIndex.isNotEmpty;//    _indSelected != -1;
-    final showEditButton = selectedTaskIndex.length == 1;//_indSelected != -1;
+    final showDeleteButton = _selectedTasksIndexes.isNotEmpty;
+    final showEditButton = _selectedTasksIndexes.length == 1;
 
     return AppBar(
       title: Text(title),                                // Заголовок окна.
       actions: [
-        if (showEditButton) ElevatedButton.icon(
-          onPressed: (){_onAppBarEditPressed(_selectedTask);},
-          style: ElevatedButton.styleFrom(
-            primary: Colors.green[400],
-            fixedSize: Size(3, 3)
-          ),
-          icon: Icon(Icons.edit),
-          label: Text("")
+        /// Кнопка редактирования задачи.
+        if (showEditButton) Container(
+          padding: EdgeInsets.all(5),
+          child:  ElevatedButton.icon(
+            onPressed: (){_onAppBarEditPressed(_selectedTask);},
+            icon: Icon(Icons.edit),
+            label: Text("")
+          )
         ),
-        if (showDeleteButton) ElevatedButton.icon(
-          onPressed: (){
-            setState(() {                               // В конце setState обновляет виджет.
-              _dataDelete(_selectedTask);               // Строка ~75.
-            });
-          },
-          style: ElevatedButton.styleFrom(
-            primary: Colors.red[900],
-            fixedSize: Size(20, 20)
-          ),
-          icon: Icon(Icons.remove),
-          label: Text("")
+        /// Кнопка удаления задачи.
+        if (showDeleteButton) Container(
+          padding: EdgeInsets.all(5),
+          child: ElevatedButton.icon(
+            onPressed: (){
+              print("кнопка удаления $_selectedTasksIndexes");
+              setState(() {                               // В конце setState обновляет виджет.
+                _dataDelete();               // Строка ~75.
+              });
+            },
+            icon: Icon(Icons.remove),
+            label: Text("")
+          )
         ),
+        /// Кнопка отмены выделения.
+        if (showDeleteButton) Container(
+          padding: EdgeInsets.all(5),
+          child: ElevatedButton.icon(
+            onPressed: (){
+              setState(() {                                                // В конце setState обновляет виджет.
+                _selectedTasksIndexes = [];
+              });
+            },
+            icon: Icon(Icons.radio_button_unchecked),
+            label: Text("")
+          )
+        )
       ],
     );
   }

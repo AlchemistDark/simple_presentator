@@ -3,13 +3,18 @@ import 'dart:async';
 /// Класс представления данных.
 class SimplePresentator{
   /// Поля интерфейса класса.
-  late TasksViewModel lastState;                     // Объект, с которым работает stream.
-  Stream<TasksViewModel> get states => _ctrl.stream; // Создаём stream.
+  // Объект, с которым работает stream.
+  late TasksViewModel lastState;
+  // Создаём stream.
+  Stream<TasksViewModel> get states => _ctrl.stream;
 
   /// Приватные поля класса.
-  StreamController<TasksViewModel> _ctrl = StreamController<TasksViewModel>.broadcast(); // Создаём контроллер этого stream.
-  late Proxy _px;                                    // Здесь хранятся все записи, полученные из _px._list.
-  final DataSource _ds;                              // Ссылка на DataSource.
+  // Создаём контроллер этого stream.
+  StreamController<TasksViewModel> _ctrl = StreamController<TasksViewModel>.broadcast();
+  // Здесь хранятся все записи, полученные из _px._list.
+  late Proxy _px;
+  // Ссылка на DataSource.
+  final DataSource _ds;
 
   /// Конструктор класса.
   SimplePresentator(this._ds){
@@ -17,6 +22,7 @@ class SimplePresentator{
     lastState = TasksViewModel([]);
     loadAll();
   }
+
   /// Обновляет последнее событие потока.
   void _fireEvent(List<Task> updatedList) {
     lastState = TasksViewModel(updatedList.toList());
@@ -37,14 +43,9 @@ class SimplePresentator{
     final List<Task> updatedList = await _px.edit(oldTask, newTask);
     _fireEvent(updatedList);
   }
-  /// Помечает задачу/снимает пометку с задачи.
-  Future<void> checkChange(Task task) async {
-    final List<Task> updatedList = await _px.checkUncheck(task);
-    _fireEvent(updatedList);
-  }
   /// Удаляет задачу.
-  Future<void> delete(Task task) async {
-    final List<Task> updatedList = await _px.delete(task);
+  Future<void> delete(List<int> indexes) async {
+    final List<Task> updatedList = await _px.delete(indexes);
     _fireEvent(updatedList);
   }
   /// Закрывает stream.
@@ -71,10 +72,10 @@ String statusToString(TaskStatusEnum status) {
 
 /// Класс задачи.
 class Task {
-  final bool isDone;
   final TaskStatusEnum status;
   final String name;
-  Task(this.name, [this.isDone = false, this.status = TaskStatusEnum.notStarted]);
+  Task(this.name, [
+    this.status = TaskStatusEnum.notStarted]);
 
   String get statusStr {
     return statusToString(status);
@@ -85,9 +86,11 @@ enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong
 
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
-  final DataSource _ds;      // Здесь хранятся все задачи, полученные из _ds._list.
+  /// Здесь хранятся все задачи, полученные из _ds._list.
+  final DataSource _ds;
 
-  Proxy(this._ds);           // Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
+  /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
+  Proxy(this._ds);
 
   /// Получает актуальный список задач.
   Future<List<Task>> loadAll() async{
@@ -125,28 +128,15 @@ class Proxy{
       return [temp];
     }
   }
-  /// Помечает задачу/снимает пометку с задачи.
-  Future<List<Task>> checkUncheck(Task task) async {
-    try {
-      await _ds.checkUncheck(task);
-      final result = await _ds.readAll();
-      print("finished edit");
-      return result;
-    } catch (e, st) {
-      print("$e, $st");
-      final temp = Task("error in checker");
-      return [temp];
-    }
-  }
   /// Удаляет задачу.
-  Future<List<Task>> delete(Task task) async {
+  Future<List<Task>> delete(List<int> indexes) async {
     try {
-      await _ds.delete(task);
+      await _ds.delete(indexes);
       final result = await _ds.readAll();
       print("finished delete");
       return result;
     } catch (e, st) {
-      print("$e, $st");
+      print("$e, $st, delete failed");
       return <Task>[];
     }
   }
@@ -154,12 +144,12 @@ class Proxy{
 
 /// Класс источника данных. Его экземпляр хранит список весх существующих задач.
 class DataSource{
-  final _list = <Task>[]; // Здесь хранятся все записи.
+  /// Здесь хранятся все записи.
+  final _list = <Task>[];
   /// Создаёт задачу.
   Future<void> create(Task task) async {
     await Future.delayed(Duration(milliseconds: 50));
     _list.add(task);
-    //return _list;
   }
   /// Редактирует задачу.
   Future<List<Task>> edit(Task oldTask, Task newTask) async {
@@ -168,18 +158,19 @@ class DataSource{
     _list[_i] = newTask;
     return _list;
   }
-  /// Помечает задачу/снимает пометку с задачи.
-  Future<List<Task>> checkUncheck(Task task) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    int _i = _list.indexOf(task);
-    final newTask = Task(task.name, !task.isDone);
-    _list[_i] = newTask;
-    return _list;
-  }
   /// Удаляет задачу.
-  Future<List<Task>> delete(Task task) async {
+  Future<List<Task>> delete(List<int> indexes) async {
     await Future.delayed(Duration(milliseconds: 30));
-    _list.remove(task);
+    indexes.sort();
+    for (; indexes.length > 0 ;){
+      print(indexes[indexes.length-1]);
+      int _i = indexes[indexes.length-1];
+      print (_list[_i].name);
+      _list.removeAt(indexes[indexes.length-1]);
+      indexes.removeAt(indexes.length-1);
+      print(_list);
+      print(indexes);
+    }
     return _list;
   }
   /// Выдаёт актуальный список задач.

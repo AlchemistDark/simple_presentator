@@ -26,7 +26,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
   /// Изменение имени задачи.
   void _onDropdownButtonChanged (TaskStatusEnum newValue){
     setState(() {
-      Task tempTask = Task(widget.task.name, false, newValue);
+      Task tempTask = Task(widget.task.name, newValue);
       _editedTask = tempTask;
     });
   }
@@ -60,7 +60,7 @@ class _TaskEditDialogState extends State<TaskEditDialog> {
           Text("Name", style: theme.textTheme.headline4,),
           Padding(
             padding: const EdgeInsets.all(8.0),
-            child: TextFormField(initialValue: widget.task.name,
+            child: TextFormField(initialValue: _editedTask.name,
               onChanged: (newText)=>_onTextSubmitted(newText),
               onFieldSubmitted: (newText)=>_onTextSubmitted(newText),
               textAlign: TextAlign.center,

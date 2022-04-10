@@ -9,8 +9,6 @@ class TaskWidget extends StatelessWidget {
   final bool isSelected;
   /// Сюда передаётся функция, выделяющая задачу.
   final void Function() onSelected;
-  /// Сюда передаётся функция, помечающая задачу.
-  final void Function(bool?) onIsDoneChanged;
 
   /// Конструктор класса.
   const TaskWidget({
@@ -18,7 +16,6 @@ class TaskWidget extends StatelessWidget {
     required this.task,
     required this.isSelected,
     required this.onSelected,
-    required this.onIsDoneChanged,
   }) : super(key: key);
 
   @override
@@ -32,13 +29,16 @@ class TaskWidget extends StatelessWidget {
     return Row(
       textDirection: TextDirection.ltr,
       children: [
-        Checkbox(
-          value: task.isDone,
-          onChanged: onIsDoneChanged,
+        Container(
+          padding: EdgeInsets.all(5),
+          child: Text(
+            task.statusStr,
+          )
         ),
-        Text(task.statusStr),
-        Expanded(child:
-          GestureDetector(
+        Container(
+          padding: EdgeInsets.all(5),
+          margin: EdgeInsets.all(0),
+          child: GestureDetector(
             onTap: onSelected,
             child: Text(task.name,
               style: TextStyle(backgroundColor: color),

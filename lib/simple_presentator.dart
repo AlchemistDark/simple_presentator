@@ -1,4 +1,7 @@
 import 'dart:async';
+//import 'dart:convert';
+//import 'package:shared_preferences/shared_preferences.dart';
+//import 'package:simple_presentator/data_source.dart';
 
 /// Класс представления данных.
 class SimplePresentator{
@@ -19,6 +22,7 @@ class SimplePresentator{
   /// Конструктор класса.
   SimplePresentator(this._ds){
     _px = Proxy(_ds);
+    //_ds.start();
     lastState = TasksViewModel([]);
     loadAll();
   }
@@ -60,6 +64,7 @@ class TasksViewModel {
   TasksViewModel(this.items);
 }
 
+/// Возвращает строку, соответсвующую статусу задачи.
 String statusToString(TaskStatusEnum status) {
   switch (status){
     case TaskStatusEnum.notStarted: return "Not started";
@@ -74,14 +79,14 @@ String statusToString(TaskStatusEnum status) {
 class Task {
   final TaskStatusEnum status;
   final String name;
-  Task(this.name, [
-    this.status = TaskStatusEnum.notStarted]);
+  Task(this.name, [this.status = TaskStatusEnum.notStarted]);
 
   String get statusStr {
     return statusToString(status);
   }
 }
 
+/// Перечисление, которое хранит все состояния задачи.
 enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong}
 
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
@@ -179,4 +184,3 @@ class DataSource{
     return _list;
   }
 }
-

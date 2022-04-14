@@ -1,9 +1,12 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';                    // Стандартная библиотека виджетов.
-import 'package:simple_presentator/task_edit_dialog.dart'; // Класс окна редактирования задач.
-import 'simple_presentator.dart';                          // Класс для асинхронной работы со списком задач.
-import 'task_widget.dart';                                 // Класс, где хранится виджет задачи.
+import 'package:flutter/material.dart';                              // Стандартная библиотека виджетов.
+import 'package:simple_presentator/task_edit_dialog.dart';           // Класс окна редактирования задач.
+import 'package:simple_presentator/simple_presentator.dart';         // Класс для асинхронной работы со списком задач.
+import 'package:simple_presentator/task_widget.dart';                // Класс, где хранится виджет задачи.
+//import 'package:simple_presentator/data_source.dart';                // Класс, где хранится список задач.
+import 'package:shared_preferences/shared_preferences.dart';         // Класс для работы с базой данных.
+
 
 void main() {
   final DataSource dataSource = DataSource();
@@ -50,6 +53,44 @@ class _MyHomePageState extends State<MyHomePage> {
   List<int> _selectedTasksIndexes = [];
   /// Здесь хранится ссылка на выбранную  задачу (ссылка передаётся в AppBar, когда её индекс совпадает _indTaped).
   Task _selectedTask = Task("name");
+  /// Флаг того, что все данные для переменных, загружемые из базы данных, загружены, а сами переменные инициализированы.
+  bool _init = false; //
+
+  @deprecated
+  int _counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
+
+  late final SharedPreferences _prefs;  // Ссылка на объект базы данных.
+
+  @override
+  void initState(){
+    super.initState();
+    _initialise();
+  }
+
+  Future<void> _initialise() async {
+    _prefs = await SharedPreferences.getInstance(); // Ссылка на объект базы данных.
+    _counter = _prefs.getInt('counter') ?? 0;
+    //await dataSource.start();
+    _init = true;
+    setState((){});
+  }
+
+  /// Я добавил это потому, что async занимает время, а в виджет что-то выводить надо.
+  @deprecated
+  Text txt(){
+    if (!_init) {
+      return Text("Значение загружается");
+    }
+    return Text(_counter.toString());
+  }
+  // String str(){
+  //   setState(() {});
+  //   if (_counter == 0) {
+  //     return "Значение загружается";
+  //   }
+  //   setState(() {});
+  //   return _counter.toString();
+  // }
 
   /// Конструктор класса.
   _MyHomePageState(this.title, this.dataSource){
@@ -59,7 +100,9 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dataAdd(String str) async {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
-  }
+    _increment();
+    setState(() {});
+   }
   /// Выделяет задачу.
   void _onTaped(Task task, int index){
     _selectedTask = task;
@@ -92,6 +135,14 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
+  /// Увеличивает счётчик и сохраняет в базу. Временная функция.
+  @deprecated
+  _increment() async{
+    //_counter = _prefs.getInt('counter') ?? 0;
+    _counter++;
+    await _prefs.setInt("counter", _counter);
+  }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -117,6 +168,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             )
           ),
+          txt(),
           TextField(
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){

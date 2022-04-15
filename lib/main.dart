@@ -79,13 +79,13 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Я добавил это потому, что async занимает время, а в виджет что-то выводить надо.
   @deprecated
-  Text txt(){
-    setState(() {});
-    if (!_init) {
-      return Text("Значение загружается");
-    }
-    return Text(present.counter.toString());
-  }
+  // String txt(){
+  //   setState(() {});
+  //   if (!_init) {
+  //     return "Значение загружается";
+  //   }
+  //   return present.counter.toString();
+  // }
 
   /// Конструктор класса.
   _MyHomePageState(this.title, this.dataSource){
@@ -95,10 +95,13 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dataAdd(String str) async {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
+    print(present.counter.toString());
+
+
     //_increment();
 
     setState(() {});
-   }
+  }
   /// Выделяет задачу.
   void _onTaped(Task task, int index){
     _selectedTask = task;
@@ -146,17 +149,17 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: lst.items.length,                                           // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
                     return TaskWidget(                                                   // Виджет описан в классе на строке 5.
-                        task: lst.items[index],
-                        isSelected: _selectedTasksIndexes.contains(index),
-                        onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
-                      );
+                      task: lst.items[index],
+                      isSelected: _selectedTasksIndexes.contains(index),
+                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
+                    );
                   }
                 );
                 return lV;
               },
             )
           ),
-          txt(),
+          Text(present.counter.toString()),
           TextField(
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){

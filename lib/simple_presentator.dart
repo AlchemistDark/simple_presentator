@@ -48,6 +48,7 @@ class SimplePresentator{
   Future<void> create(Task task) async {
     final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
+    counter = _px.counter;
   }
 
   /// Редактирует задачу.

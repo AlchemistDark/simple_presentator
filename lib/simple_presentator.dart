@@ -1,6 +1,6 @@
 import 'dart:async';
 //import 'dart:convert';
-//import 'package:shared_preferences/shared_preferences.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 //import 'package:simple_presentator/data_source.dart';
 
 /// Класс представления данных.
@@ -16,12 +16,19 @@ class SimplePresentator{
   StreamController<TasksViewModel> _ctrl = StreamController<TasksViewModel>.broadcast();
   // Здесь хранятся все записи, полученные из _px._list.
   late Proxy _px;
+  
+  @deprecated
+  late int counter;
   // Ссылка на DataSource.
   final DataSource _ds;
+  // Ссылка на объект базы данных.
+  final SharedPreferences _data;  
+
 
   /// Конструктор класса.
-  SimplePresentator(this._ds){
-    _px = Proxy(_ds);
+  SimplePresentator(this._ds, this._data){
+    _px = Proxy(_ds, _data);
+    counter = _px.counter;
     //_ds.start();
     lastState = TasksViewModel([]);
     loadAll();
@@ -42,6 +49,7 @@ class SimplePresentator{
     final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
   }
+
   /// Редактирует задачу.
   Future<void> edit(Task oldTask, Task newTask) async {
     final List<Task> updatedList = await _px.edit(oldTask, newTask);
@@ -93,9 +101,29 @@ enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong
 class Proxy{
   /// Здесь хранятся все задачи, полученные из _ds._list.
   final DataSource _ds;
+  final SharedPreferences _data;
+
+  @deprecated
+  int counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
 
   /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
-  Proxy(this._ds);
+  Proxy(this._ds, this._data){
+    counter = _data.getInt('counter') ?? 0;
+  }
+
+
+
+  /// Увеличивает счётчик и сохраняет в базу. Временная функция.
+  @deprecated
+  _increment() async{
+    //_counter = _prefs.getInt('counter') ?? 0;
+    counter++;
+    await _data.setInt("counter", counter);
+  }
+
+
+
+
 
   /// Получает актуальный список задач.
   Future<List<Task>> loadAll() async{
@@ -112,6 +140,7 @@ class Proxy{
   Future<List<Task>> create(Task task) async {
     try {
       await _ds.create(task);
+      _increment();
       final result = await _ds.readAll();
       print("finished create");
       return result;

@@ -57,9 +57,9 @@ class _MyHomePageState extends State<MyHomePage> {
   bool _init = false; //
 
   @deprecated
-  int _counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
+  //int _counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
 
-  late final SharedPreferences _prefs;  // Ссылка на объект базы данных.
+  late final SharedPreferences _data;  // Ссылка на объект базы данных.
 
   @override
   void initState(){
@@ -68,8 +68,10 @@ class _MyHomePageState extends State<MyHomePage> {
   }
 
   Future<void> _initialise() async {
-    _prefs = await SharedPreferences.getInstance(); // Ссылка на объект базы данных.
-    _counter = _prefs.getInt('counter') ?? 0;
+    _data = await SharedPreferences.getInstance(); // Ссылка на объект базы данных.
+    present = SimplePresentator(dataSource, _data);
+    int _counter = _data.getInt('counter') ?? 0;
+    print(_counter);
     //await dataSource.start();
     _init = true;
     setState((){});
@@ -78,29 +80,23 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Я добавил это потому, что async занимает время, а в виджет что-то выводить надо.
   @deprecated
   Text txt(){
+    setState(() {});
     if (!_init) {
       return Text("Значение загружается");
     }
-    return Text(_counter.toString());
+    return Text(present.counter.toString());
   }
-  // String str(){
-  //   setState(() {});
-  //   if (_counter == 0) {
-  //     return "Значение загружается";
-  //   }
-  //   setState(() {});
-  //   return _counter.toString();
-  // }
 
   /// Конструктор класса.
   _MyHomePageState(this.title, this.dataSource){
-    present = SimplePresentator(dataSource);
+    //present = SimplePresentator(dataSource, _data);
   }
   /// Создаёт задачу.
   void _dataAdd(String str) async {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
-    _increment();
+    //_increment();
+
     setState(() {});
    }
   /// Выделяет задачу.
@@ -135,18 +131,10 @@ class _MyHomePageState extends State<MyHomePage> {
     }
   }
 
-  /// Увеличивает счётчик и сохраняет в базу. Временная функция.
-  @deprecated
-  _increment() async{
-    //_counter = _prefs.getInt('counter') ?? 0;
-    _counter++;
-    await _prefs.setInt("counter", _counter);
-  }
-
-  @override
-  Widget build(BuildContext context) {
-    return Scaffold(
-      body: Column(
+  /// Возвращает главный элемент главного окна.
+  Widget mySteam() {
+    if (_init) {
+      return Column(
         children: [
           Flexible (child:
             StreamBuilder<TasksViewModel>(
@@ -158,10 +146,10 @@ class _MyHomePageState extends State<MyHomePage> {
                   itemCount: lst.items.length,                                           // Эта строка сообщает ListView.builder сколько всего элементов в списке.
                   itemBuilder: (BuildContext context, int index) {
                     return TaskWidget(                                                   // Виджет описан в классе на строке 5.
-                      task: lst.items[index],
-                      isSelected: _selectedTasksIndexes.contains(index),
-                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
-                    );
+                        task: lst.items[index],
+                        isSelected: _selectedTasksIndexes.contains(index),
+                        onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
+                      );
                   }
                 );
                 return lV;
@@ -183,7 +171,14 @@ class _MyHomePageState extends State<MyHomePage> {
             ),
           )
         ]
-      ),
+      );
+    }
+    return Text("Грузиццо...", style: Theme.of(context).textTheme.headline4);
+  }
+  @override
+  Widget build(BuildContext context) {
+    return Scaffold(
+      body: mySteam(),
       appBar: _buildAppBar()
     );
   }
@@ -234,7 +229,5 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
+
 }
-
-
-

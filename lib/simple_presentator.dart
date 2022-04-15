@@ -29,7 +29,6 @@ class SimplePresentator{
   SimplePresentator(this._ds, this._data){
     _px = Proxy(_ds, _data);
     counter = _px.counter;
-    //_ds.start();
     lastState = TasksViewModel([]);
     loadAll();
   }
@@ -112,19 +111,12 @@ class Proxy{
     counter = _data.getInt('counter') ?? 0;
   }
 
-
-
   /// Увеличивает счётчик и сохраняет в базу. Временная функция.
   @deprecated
   _increment() async{
-    //_counter = _prefs.getInt('counter') ?? 0;
     counter++;
     await _data.setInt("counter", counter);
   }
-
-
-
-
 
   /// Получает актуальный список задач.
   Future<List<Task>> loadAll() async{

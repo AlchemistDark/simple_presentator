@@ -43,11 +43,14 @@ class MyHomePage extends StatefulWidget {
 /// State главного окна приложения.
 class _MyHomePageState extends State<MyHomePage> {
   /// Ссылка на источник данных.
-  final DataSource dataSource;
+  final DataSource dataSource; // todo Возможно устареет.
   /// Заголовок главного окна.
   final String title;
   /// Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
   late SimplePresentator present;
+
+  /// Ссылка на объект базы данных.
+  late final SharedPreferences _data;
   /// Здесь хранится список индексов выделенных задач.
   /// -1 означает, что в данный момент таких задач нет.
   List<int> _selectedTasksIndexes = [];
@@ -56,10 +59,19 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Флаг того, что все данные для переменных, загружемые из базы данных, загружены, а сами переменные инициализированы.
   bool _init = false; //
 
-  @deprecated
-  //int _counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
+  /// Конструктор класса.
+  _MyHomePageState(this.title, this.dataSource){
+    //present = SimplePresentator(dataSource, _data);
+  }
 
-  late final SharedPreferences _data;  // Ссылка на объект базы данных.
+  /// Проводит отложенную инициализацию для полей класса, тип которых нужно получить из Future.
+  /// Потом устанавливает флаг что инициализация этих полей закончена.
+  Future<void> _initialise() async {
+    _data = await SharedPreferences.getInstance(); // Ссылка на объект базы данных.
+    present = SimplePresentator(dataSource, _data);
+    _init = true;
+    setState((){});
+  }
 
   @override
   void initState(){
@@ -67,39 +79,11 @@ class _MyHomePageState extends State<MyHomePage> {
     _initialise();
   }
 
-  Future<void> _initialise() async {
-    _data = await SharedPreferences.getInstance(); // Ссылка на объект базы данных.
-    present = SimplePresentator(dataSource, _data);
-    int _counter = _data.getInt('counter') ?? 0;
-    print(_counter);
-    //await dataSource.start();
-    _init = true;
-    setState((){});
-  }
-
-  /// Я добавил это потому, что async занимает время, а в виджет что-то выводить надо.
-  @deprecated
-  // String txt(){
-  //   setState(() {});
-  //   if (!_init) {
-  //     return "Значение загружается";
-  //   }
-  //   return present.counter.toString();
-  // }
-
-  /// Конструктор класса.
-  _MyHomePageState(this.title, this.dataSource){
-    //present = SimplePresentator(dataSource, _data);
-  }
   /// Создаёт задачу.
   void _dataAdd(String str) async {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
     print(present.counter.toString());
-
-
-    //_increment();
-
     setState(() {});
   }
   /// Выделяет задачу.
@@ -151,7 +135,7 @@ class _MyHomePageState extends State<MyHomePage> {
                     return TaskWidget(                                                   // Виджет описан в классе на строке 5.
                       task: lst.items[index],
                       isSelected: _selectedTasksIndexes.contains(index),
-                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~65. callBack.
+                      onSelected: (){setState((){_onTaped(lst.items[index], index);});}, // Строка ~90. callBack.
                     );
                   }
                 );
@@ -164,7 +148,7 @@ class _MyHomePageState extends State<MyHomePage> {
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){
               setState(() {
-                _dataAdd(text);                            // Добавляет таск в tasks (строка ~60)
+                _dataAdd(text);                            // Добавляет таск в tasks (строка ~85)
                 TextEditingController().text = " ";        // Эта хрень чистит поле после каждого ввода.
               });                                          // В конце setState обновляет виджет.
             },
@@ -178,6 +162,7 @@ class _MyHomePageState extends State<MyHomePage> {
     }
     return Text("Грузиццо...", style: Theme.of(context).textTheme.headline4);
   }
+
   @override
   Widget build(BuildContext context) {
     return Scaffold(
@@ -186,6 +171,7 @@ class _MyHomePageState extends State<MyHomePage> {
     );
   }
 
+  /// AppBar у нас кастомный.
   AppBar _buildAppBar() {
     final showDeleteButton = _selectedTasksIndexes.isNotEmpty;
     final showEditButton = _selectedTasksIndexes.length == 1;
@@ -209,7 +195,7 @@ class _MyHomePageState extends State<MyHomePage> {
             onPressed: (){
               print("кнопка удаления $_selectedTasksIndexes");
               setState(() {                               // В конце setState обновляет виджет.
-                _dataDelete();               // Строка ~75.
+                _dataDelete();               // Строка ~100.
               });
             },
             icon: Icon(Icons.remove),
@@ -232,5 +218,4 @@ class _MyHomePageState extends State<MyHomePage> {
       ],
     );
   }
-
 }

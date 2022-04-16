@@ -19,6 +19,9 @@ class SimplePresentator{
   
   @deprecated
   late int counter;
+  @deprecated
+  late String taskString;
+
   // Ссылка на DataSource.
   final DataSource _ds;
   // Ссылка на объект базы данных.
@@ -29,6 +32,7 @@ class SimplePresentator{
   SimplePresentator(this._ds, this._data){
     _px = Proxy(_ds, _data);
     counter = _px.counter;
+    taskString = _px.taskString;
     lastState = TasksViewModel([]);
     loadAll();
   }
@@ -48,6 +52,8 @@ class SimplePresentator{
     final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
     counter = _px.counter;
+    taskString = _px.taskString;
+    print("что-то не так $taskString, ${_px.taskString}, $counter, ${_px.counter}");
   }
 
   /// Редактирует задачу.
@@ -105,17 +111,30 @@ class Proxy{
 
   @deprecated
   int counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
+  @deprecated
+  String taskString = ' '; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
+  @deprecated
+  List<String> taskStringList = []; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
 
   /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
   Proxy(this._ds, this._data){
     counter = _data.getInt('counter') ?? 0;
+    taskString = _data.getString('task string') ?? '';
+    taskStringList = _data.getStringList('task string list') ?? []; // ToDo добавить использование в следующей версии.
   }
 
   /// Увеличивает счётчик и сохраняет в базу. Временная функция.
   @deprecated
-  _increment() async{
+  _increment(Task task) async{
     counter++;
+    taskString = taskString + ", " + task.name;
+    taskStringList.add(task.name);
+    print(taskStringList);
+    print("имя добавлемой таски ${task.name}");
     await _data.setInt("counter", counter);
+    await _data.setString('task string', taskString);
+    await _data.setStringList('task string list', taskStringList);
+    print ('таска ${task.name} добавлена');
   }
 
   /// Получает актуальный список задач.
@@ -133,7 +152,8 @@ class Proxy{
   Future<List<Task>> create(Task task) async {
     try {
       await _ds.create(task);
-      _increment();
+      _increment(task);
+      print("таска ${task.name} совершенно точно добавлена");
       final result = await _ds.readAll();
       print("finished create");
       return result;

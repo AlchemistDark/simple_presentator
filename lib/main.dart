@@ -84,6 +84,7 @@ class _MyHomePageState extends State<MyHomePage> {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
     print(present.counter.toString());
+    print("имя последней таски ${present.taskString}");
     setState(() {});
   }
   /// Выделяет задачу.
@@ -143,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             )
           ),
-          Text(present.counter.toString()),
+          Text('${present.counter.toString()}, ${present.taskString}'),
           TextField(
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){

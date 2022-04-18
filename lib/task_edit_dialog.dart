@@ -1,5 +1,5 @@
 import 'package:flutter/material.dart';
-import 'package:simple_presentator/simple_presentator.dart';
+import 'package:simple_presentator/task.dart';
 
 class TaskEditDialog extends StatefulWidget{
 

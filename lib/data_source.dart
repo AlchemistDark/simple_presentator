@@ -1,7 +1,7 @@
 import 'dart:async';
 import 'dart:convert';
+import 'package:simple_presentator/task.dart';
 import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simple_presentator/simple_presentator.dart';
 
 /// Класс источника данных. Его экземпляр хранит список весх существующих задач.
 /// Первым методом вызываемым при работе с этим классом обязательно должен быть .start().

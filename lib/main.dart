@@ -1,6 +1,7 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                              // Стандартная библиотека виджетов.
+import 'package:simple_presentator/task.dart';                       // Класс задачи.
 import 'package:simple_presentator/task_edit_dialog.dart';           // Класс окна редактирования задач.
 import 'package:simple_presentator/simple_presentator.dart';         // Класс для асинхронной работы со списком задач.
 import 'package:simple_presentator/task_widget.dart';                // Класс, где хранится виджет задачи.
@@ -83,7 +84,6 @@ class _MyHomePageState extends State<MyHomePage> {
   void _dataAdd(String str) async {
     final task = Task(str);
     await present.create(task);                            // Метод класса из строки 4 для создания задачи.
-    print(present.counter.toString());
     print("имя последней таски ${present.taskString}");
     setState(() {});
   }
@@ -144,7 +144,7 @@ class _MyHomePageState extends State<MyHomePage> {
               },
             )
           ),
-          Text('${present.counter.toString()}, ${present.taskString}'),
+          Text('${present.taskString}'),
           TextField(
             controller: TextEditingController(),           // Эта хрень нужна что бы чисть поле после каждого ввода.
             onSubmitted: (text){

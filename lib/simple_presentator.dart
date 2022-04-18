@@ -1,7 +1,8 @@
 import 'dart:async';
-//import 'dart:convert';
-import 'package:shared_preferences/shared_preferences.dart';
+import 'dart:convert';
+import 'package:simple_presentator/task.dart';
 //import 'package:simple_presentator/data_source.dart';
+import 'package:shared_preferences/shared_preferences.dart';
 
 /// Класс представления данных.
 class SimplePresentator{
@@ -18,8 +19,6 @@ class SimplePresentator{
   late Proxy _px;
   
   @deprecated
-  late int counter;
-  @deprecated
   late String taskString;
 
   // Ссылка на DataSource.
@@ -31,7 +30,6 @@ class SimplePresentator{
   /// Конструктор класса.
   SimplePresentator(this._ds, this._data){
     _px = Proxy(_ds, _data);
-    counter = _px.counter;
     taskString = _px.taskString;
     lastState = TasksViewModel([]);
     loadAll();
@@ -51,9 +49,8 @@ class SimplePresentator{
   Future<void> create(Task task) async {
     final List<Task> updatedList = await _px.create(task);
     _fireEvent(updatedList);
-    counter = _px.counter;
     taskString = _px.taskString;
-    print("что-то не так $taskString, ${_px.taskString}, $counter, ${_px.counter}");
+    print("что-то не так $taskString, ${_px.taskString}");
   }
 
   /// Редактирует задачу.
@@ -72,37 +69,6 @@ class SimplePresentator{
   }
 }
 
-/// Класс, преобразующий задачу для вывода (например, в консоль или в специальный виджет).
-class TasksViewModel {
-  final List<Task> items;
-  TasksViewModel(this.items);
-}
-
-/// Возвращает строку, соответсвующую статусу задачи.
-String statusToString(TaskStatusEnum status) {
-  switch (status){
-    case TaskStatusEnum.notStarted: return "Not started";
-    case TaskStatusEnum.started: return "Started";
-    case TaskStatusEnum.inProgress: return "In Progress";
-    case TaskStatusEnum.finished: return "Finished";
-    case TaskStatusEnum.somethingIsWrong: return "Something is wrong";
-  }
-}
-
-/// Класс задачи.
-class Task {
-  final TaskStatusEnum status;
-  final String name;
-  Task(this.name, [this.status = TaskStatusEnum.notStarted]);
-
-  String get statusStr {
-    return statusToString(status);
-  }
-}
-
-/// Перечисление, которое хранит все состояния задачи.
-enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong}
-
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
 class Proxy{
   /// Здесь хранятся все задачи, полученные из _ds._list.
@@ -110,39 +76,48 @@ class Proxy{
   final SharedPreferences _data;
 
   @deprecated
-  int counter = 0; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
-  @deprecated
   String taskString = ' '; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
   @deprecated
   List<String> taskStringList = []; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
 
   /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
   Proxy(this._ds, this._data){
-    counter = _data.getInt('counter') ?? 0;
     taskString = _data.getString('task string') ?? '';
-    taskStringList = _data.getStringList('task string list') ?? []; // ToDo добавить использование в следующей версии.
+    taskStringList = _data.getStringList('task string list') ?? [];
   }
 
   /// Увеличивает счётчик и сохраняет в базу. Временная функция.
   @deprecated
-  _increment(Task task) async{
-    counter++;
-    taskString = taskString + ", " + task.name;
-    taskStringList.add(task.name);
+  _dataAdd(Task task) async{
+    taskString = jsonEncode(task.toJSON());
+    print(taskString);
+    taskStringList.add(taskString);
     print(taskStringList);
     print("имя добавлемой таски ${task.name}");
-    await _data.setInt("counter", counter);
     await _data.setString('task string', taskString);
     await _data.setStringList('task string list', taskStringList);
     print ('таска ${task.name} добавлена');
+
+    // для отладки
+    final _resultStringList = _data.getStringList('task string list') ?? ['спун'];
+    print('_resultStringList $_resultStringList');
   }
 
   /// Получает актуальный список задач.
-  Future<List<Task>> loadAll() async{
+  List<Task> loadAll() {
     try {
-      final result = await _ds.readAll();
+      taskStringList = _data.getStringList('task string list') ?? [];
+      print(taskStringList);
+      final _resultTaskList = <Task>[];
+      for(int i = 0; i < taskStringList.length; i++) {
+        final parsedJSON = jsonDecode(taskStringList[i]);
+        print("распарсеный таск $parsedJSON");
+        _resultTaskList.add(Task.fromJSON(parsedJSON));
+      }
+      //_ds.readAll();
+
       print("finished loadAll");
-      return result;
+      return _resultTaskList;
     } catch (e, st) {
       print("$e, $st");
       return <Task>[];
@@ -152,7 +127,7 @@ class Proxy{
   Future<List<Task>> create(Task task) async {
     try {
       await _ds.create(task);
-      _increment(task);
+      _dataAdd(task);
       print("таска ${task.name} совершенно точно добавлена");
       final result = await _ds.readAll();
       print("finished create");

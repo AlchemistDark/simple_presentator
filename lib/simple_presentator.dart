@@ -12,13 +12,13 @@ class SimplePresentator{
   // Создаём контроллер этого stream.
   StreamController<TasksViewModel> _ctrl = StreamController<TasksViewModel>.broadcast();
   // Здесь хранятся все записи, полученные из _px._list.
-  late Proxy _px;
+  late _Proxy _px;
   // Ссылка на DataSource.
-  final DataSource _ds;
+  final IDataSource _ds;
 
   /// Конструктор класса.
-  SimplePresentator(this._ds){
-    _px = Proxy(_ds);
+  SimplePresentator(this._ds) {
+    _px = _Proxy(_ds);
     lastState = TasksViewModel([]);
     loadAll();
   }
@@ -85,12 +85,12 @@ class Task {
 enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong}
 
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
-class Proxy{
+class _Proxy{
   /// Здесь хранятся все задачи, полученные из _ds._list.
-  final DataSource _ds;
+  final IDataSource _ds;
 
   /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
-  Proxy(this._ds);
+  _Proxy(this._ds);
 
   /// Получает актуальный список задач.
   Future<List<Task>> loadAll() async{
@@ -111,6 +111,7 @@ class Proxy{
       print("finished create");
       return result;
     } catch (e, st) {
+      rethrow;
       print("$e, $st");
       return  <Task>[];
     }
@@ -143,40 +144,17 @@ class Proxy{
 }
 
 /// Класс источника данных. Его экземпляр хранит список весх существующих задач.
-class DataSource{
-  /// Здесь хранятся все записи.
-  final _list = <Task>[];
+abstract class IDataSource {
   /// Создаёт задачу.
-  Future<void> create(Task task) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    _list.add(task);
-  }
+  Future<void> create(Task task);
+
   /// Редактирует задачу.
-  Future<List<Task>> edit(Task oldTask, Task newTask) async {
-    await Future.delayed(Duration(milliseconds: 50));
-    int _i = _list.indexOf(oldTask);
-    _list[_i] = newTask;
-    return _list;
-  }
+  Future<List<Task>> edit(Task oldTask, Task newTask);
+
   /// Удаляет задачу.
-  Future<List<Task>> delete(List<int> indexes) async {
-    await Future.delayed(Duration(milliseconds: 30));
-    indexes.sort();
-    for (; indexes.length > 0 ;){
-      print(indexes[indexes.length-1]);
-      int _i = indexes[indexes.length-1];
-      print (_list[_i].name);
-      _list.removeAt(indexes[indexes.length-1]);
-      indexes.removeAt(indexes.length-1);
-      print(_list);
-      print(indexes);
-    }
-    return _list;
-  }
+  Future<List<Task>> delete(List<int> indexes);
+
   /// Выдаёт актуальный список задач.
-  Future<List<Task>> readAll() async {
-    await Future.delayed(Duration(milliseconds: 50));
-    return _list;
-  }
+  Future<List<Task>> readAll();
 }
 

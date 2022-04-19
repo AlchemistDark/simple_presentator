@@ -1,18 +1,25 @@
 //import 'dart:html';
 
 import 'package:flutter/material.dart';                    // Стандартная библиотека виджетов.
+import 'package:shared_preferences/shared_preferences.dart';
+import 'package:simple_presentator/shared_preferences_tasks_ds.dart';
 import 'package:simple_presentator/task_edit_dialog.dart'; // Класс окна редактирования задач.
+import 'mock_data_source.dart';
 import 'simple_presentator.dart';                          // Класс для асинхронной работы со списком задач.
 import 'task_widget.dart';                                 // Класс, где хранится виджет задачи.
 
-void main() {
-  final DataSource dataSource = DataSource();
+void main() async {
+  WidgetsFlutterBinding.ensureInitialized();
+
+  // final IDataSource dataSource = MockDataSource();
+  final shp = await SharedPreferences.getInstance();
+  final IDataSource dataSource = SharedPreferencesTasksDataSource(shp);
   runApp(MyApp(dataSource));
 }
 
 /// Приложение.
 class MyApp extends StatelessWidget {
-  final DataSource dataSource;
+  final IDataSource dataSource;
   MyApp(this.dataSource);
 
   @override
@@ -30,7 +37,7 @@ class MyApp extends StatelessWidget {
 /// Главное окно приложения.
 class MyHomePage extends StatefulWidget {
   final String title;
-  final DataSource dataSource;
+  final IDataSource dataSource;
   MyHomePage({Key? key, required this.title, required this.dataSource}) : super(key: key);
 
   @override
@@ -40,7 +47,7 @@ class MyHomePage extends StatefulWidget {
 /// State главного окна приложения.
 class _MyHomePageState extends State<MyHomePage> {
   /// Ссылка на источник данных.
-  final DataSource dataSource;
+  final IDataSource dataSource;
   /// Заголовок главного окна.
   final String title;
   /// Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.

@@ -25,6 +25,11 @@ class Task {
     this.name = data["name"] as String;
   }
 
+  @override
+  String toString() {
+    return '{"name": $name, "status": ${statusToString(status)}}';
+  }
+
   /// Для сохранения в файл.
   Map<String, dynamic> toJSON(){
     return {

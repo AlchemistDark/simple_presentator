@@ -75,9 +75,9 @@ class Proxy{
   final DataSource _ds;
   final SharedPreferences _data;
 
-  @deprecated
-  String taskString = ' '; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
-  @deprecated
+  /// Представление задачи в виде строки.
+  String taskString = ' ';
+  /// Список задач, представленных в виде строк.
   List<String> taskStringList = []; // Это временная переменная, которая нужна что бы проверить работу библиотеки.
 
   /// Конструктор этого класса. Его экземпляр хранит все задачи, полученные из _ds._list.
@@ -91,7 +91,7 @@ class Proxy{
   _dataAdd(Task task) async{
     taskString = jsonEncode(task.toJSON());
     print(taskString);
-    taskStringList.add(taskString);
+    taskStringList.add(task.toString());
     print(taskStringList);
     print("имя добавлемой таски ${task.name}");
     await _data.setString('task string', taskString);

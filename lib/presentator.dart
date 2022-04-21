@@ -1,7 +1,8 @@
-import 'dart:async';
+import 'dart:async';                             // Класс для асинхронной работы.
+import 'package:simple_presentator/task.dart';   // Класс задачи.
 
 /// Класс представления данных.
-class SimplePresentator{
+class Presentator{
   /// Поля интерфейса класса.
   // Объект, с которым работает stream.
   late TasksViewModel lastState;
@@ -17,7 +18,7 @@ class SimplePresentator{
   final IDataSource _ds;
 
   /// Конструктор класса.
-  SimplePresentator(this._ds) {
+  Presentator(this._ds) {
     _px = _Proxy(_ds);
     lastState = TasksViewModel([]);
     loadAll();
@@ -54,36 +55,6 @@ class SimplePresentator{
   }
 }
 
-/// Класс, преобразующий задачу для вывода (например, в консоль или в специальный виджет).
-class TasksViewModel {
-  final List<Task> items;
-  TasksViewModel(this.items);
-}
-
-String statusToString(TaskStatusEnum status) {
-  switch (status){
-    case TaskStatusEnum.notStarted: return "Not started";
-    case TaskStatusEnum.started: return "Started";
-    case TaskStatusEnum.inProgress: return "In Progress";
-    case TaskStatusEnum.finished: return "Finished";
-    case TaskStatusEnum.somethingIsWrong: return "Something is wrong";
-  }
-}
-
-/// Класс задачи.
-class Task {
-  final TaskStatusEnum status;
-  final String name;
-  Task(this.name, [
-    this.status = TaskStatusEnum.notStarted]);
-
-  String get statusStr {
-    return statusToString(status);
-  }
-}
-
-enum TaskStatusEnum {notStarted, started, inProgress, finished, somethingIsWrong}
-
 /// Хранит функции доступа к DataSource (источнику данных) что бы не захламлять основной (SimplePresentator) класс.
 class _Proxy{
   /// Здесь хранятся все задачи, полученные из _ds._list.
@@ -110,10 +81,8 @@ class _Proxy{
       final result = await _ds.readAll();
       print("finished create");
       return result;
-    } catch (e, st) {
+    } catch (e) {
       rethrow;
-      print("$e, $st");
-      return  <Task>[];
     }
   }
   /// Редактирует задачу.
@@ -141,6 +110,12 @@ class _Proxy{
       return <Task>[];
     }
   }
+}
+
+/// Класс, преобразующий задачу для вывода (например, в консоль или в специальный виджет).
+class TasksViewModel {
+  final List<Task> items;
+  TasksViewModel(this.items);
 }
 
 /// Класс источника данных. Его экземпляр хранит список весх существующих задач.

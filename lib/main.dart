@@ -1,12 +1,15 @@
 //import 'dart:html';
 
-import 'package:flutter/material.dart';                    // Стандартная библиотека виджетов.
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simple_presentator/shared_preferences_tasks_ds.dart';
-import 'package:simple_presentator/task_edit_dialog.dart'; // Класс окна редактирования задач.
-import 'mock_data_source.dart';
-import 'simple_presentator.dart';                          // Класс для асинхронной работы со списком задач.
-import 'task_widget.dart';                                 // Класс, где хранится виджет задачи.
+import 'package:flutter/material.dart';                                        // Стандартная библиотека виджетов.
+import 'package:shared_preferences/shared_preferences.dart';                   // Библиотека, обеспечивающая хранение списка задач на устройтсве.
+import 'package:simple_presentator/shared_preferences_tasks_ds.dart';          // Класс-посредниик между библиотекой,
+                                                                               // обеспечивающей хранение списка задач на устройтсве
+                                                                               // и классом представления этого списка в UI приложения.
+import 'package:simple_presentator/presentator.dart';                          // Класс представления списка задач в UI приложения
+                                                                               // и асинхронной работы с этим списком.
+import 'package:simple_presentator/task.dart';                                 // Класс задачи.
+import 'package:simple_presentator/task_widget.dart';                          // Класс, где хранится виджет задачи.
+import 'package:simple_presentator/task_edit_dialog.dart';                     // Класс окна редактирования задач.
 
 void main() async {
   WidgetsFlutterBinding.ensureInitialized();
@@ -51,7 +54,7 @@ class _MyHomePageState extends State<MyHomePage> {
   /// Заголовок главного окна.
   final String title;
   /// Объект потока данных, с которым работают виджеты окна. Класс описан на строке 4.
-  late SimplePresentator present;
+  late Presentator present;
   /// Здесь хранится список индексов выделенных задач.
   /// -1 означает, что в данный момент таких задач нет.
   List<int> _selectedTasksIndexes = [];
@@ -60,7 +63,7 @@ class _MyHomePageState extends State<MyHomePage> {
 
   /// Конструктор класса.
   _MyHomePageState(this.title, this.dataSource){
-    present = SimplePresentator(dataSource);
+    present = Presentator(dataSource);
   }
   /// Создаёт задачу.
   void _dataAdd(String str) async {

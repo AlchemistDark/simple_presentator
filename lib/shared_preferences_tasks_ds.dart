@@ -1,12 +1,18 @@
-import 'package:shared_preferences/shared_preferences.dart';
-import 'package:simple_presentator/simple_presentator.dart';
-import 'dart:convert';
-
+import 'dart:convert';                                               // Стандартная библиотека конвертации.
+import 'package:shared_preferences/shared_preferences.dart';         // Библиотека, обеспечивающая хранение списка задач на устройтсве.
+import 'package:simple_presentator/presentator.dart';                // Класс представления списка задач в UI приложения
+                                                                     // и асинхронной работы с этим списком.
+import 'package:simple_presentator/task.dart';                       // Класс задачи.
 
 class SharedPreferencesTasksDataSource implements IDataSource {
 
+  final SharedPreferences _data;
+  final List<Task> _tasksCache = <Task>[];
+
+  /// КОнструктор класса.
   SharedPreferencesTasksDataSource(this._data);
 
+  /// Выдаёт актуальный список задач.
   @override
   Future<List<Task>> readAll() async {
     final strList = _data.getStringList(_taskListId) ?? [];
@@ -25,11 +31,8 @@ class SharedPreferencesTasksDataSource implements IDataSource {
     return _tasksCache.toList(growable: false);
   }
 
-
-  @override
-  Future<void> create(Task newTask) async {
-    _tasksCache.add(newTask);
-
+  /// Запись актуальных данных.
+  void writeToStorage(){
     final strList = <String>[];
 
     for (var task in _tasksCache) {
@@ -41,10 +44,28 @@ class SharedPreferencesTasksDataSource implements IDataSource {
     _data.setStringList(_taskListId, strList);
   }
 
+  /// Создаёт задачу.
   @override
-  Future<List<Task>> delete(List<int> indexes) {
-    // TODO: implement delete
-    throw UnimplementedError();
+  Future<void> create(Task newTask) async {
+    _tasksCache.add(newTask);
+    writeToStorage();
+  }
+
+  @override
+  Future<List<Task>> delete(List<int> indexes) async {
+    indexes.sort();
+    readAll();
+    for (; indexes.length > 0 ;){
+      print(indexes[indexes.length-1]);
+      int _i = indexes[indexes.length-1];
+      print (_tasksCache[_i].name);
+      _tasksCache.removeAt(indexes[indexes.length-1]);
+      indexes.removeAt(indexes.length-1);
+      print(_tasksCache);
+      print(indexes);
+    }
+    writeToStorage();
+    return _tasksCache;
   }
 
   @override
@@ -53,7 +74,7 @@ class SharedPreferencesTasksDataSource implements IDataSource {
     throw UnimplementedError();
   }
 
-
+  /// Читает задачу из JSON.
   Task _taskFromJson(Map<String, Object?> obj) {
     return Task(
       obj[_taskName] as String,
@@ -61,6 +82,7 @@ class SharedPreferencesTasksDataSource implements IDataSource {
     );
   }
 
+  /// Преобразует задачу в JSON.
   Map<String, Object> _taskToJson(Task task) {
     return {
       _taskName: task.name,
@@ -79,7 +101,7 @@ class SharedPreferencesTasksDataSource implements IDataSource {
     }
   }
 
-  /// Возвращает строку, соответсвующую статусу задачи.
+  /// Возвращает статус задачи из строки.
   TaskStatusEnum _statusFromString(String status) {
     switch (status) {
       case _statusNotStarted: return TaskStatusEnum.notStarted;
@@ -91,10 +113,6 @@ class SharedPreferencesTasksDataSource implements IDataSource {
 
     throw ArgumentError('Unknown status string: \"$status\"');
   }
-
-
-  final SharedPreferences _data;
-  final List <Task> _tasksCache = <Task>[];
 }
 
 const _taskListId = "taskListId";

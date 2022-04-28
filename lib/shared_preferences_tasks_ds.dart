@@ -67,12 +67,21 @@ class SharedPreferencesTasksDataSource implements IDataSource {
   @override
   // ToDo почему-то иногда _tasksCache.indexOf(oldTask) возвращает -1.
   Future<List<Task>> edit(Task oldTask, Task newTask) async {
-    print("шптд таск индекс ${_tasksCache.indexOf(oldTask)}");
+    print("шптд таск индекс ${_tasksCache.indexOf(oldTask)}");   // Для отладки
+    _fPrint();                                                   // Для отладки
     int _i = _tasksCache.indexOf(oldTask);
+    _fPrint();                                                   // Для отладки
     _tasksCache[_i] = newTask;
-    print("шптд таск индекс 2 ${_tasksCache.indexOf(oldTask)}");
+    _fPrint();                                                   // Для отладки
+    print("шптд таск индекс 2 ${_tasksCache.indexOf(oldTask)}"); // Для отладки
     writeToStorage();
     return _tasksCache;
+  }
+  // Для отладки.
+  void _fPrint(){
+    for (Task task in _tasksCache){
+      print ("таска ${_tasksCache.indexOf(task)} ${task.name}");
+    }
   }
 
   /// Запись актуальных данных.

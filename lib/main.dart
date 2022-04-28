@@ -72,6 +72,7 @@ class _MyHomePageState extends State<MyHomePage> {
   }
   /// Выделяет задачу.
   void _onTaped(Task task, int index){
+    print('он - тапок $task, $index');
     _selectedTask = task;
     if (_selectedTasksIndexes.contains(index)) {
       _selectedTasksIndexes.remove(index);
